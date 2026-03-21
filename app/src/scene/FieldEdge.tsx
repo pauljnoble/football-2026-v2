@@ -2,10 +2,7 @@ import { useMemo } from "react";
 import { useTexture } from "@react-three/drei";
 import {
   BufferGeometry,
-  CanvasTexture,
-  ClampToEdgeWrapping,
   Float32BufferAttribute,
-  LinearFilter,
   RepeatWrapping,
   SRGBColorSpace,
 } from "three";
@@ -20,7 +17,6 @@ const sideOffset = 0.01;
 const bottomWaveWorldStep = 6;
 const bottomWaveAmplitude = 0.3;
 const bottomWaveDetailPerStep = 8;
-const defaultBottomOpacityFeatherDistance = 0.3;
 
 function createBottomEdgeGeometry(
   width: number,
@@ -96,46 +92,7 @@ function createBottomEdgeGeometry(
   return geometry;
 }
 
-function createBottomOpacityAlphaMap(drop: number, featherDistance: number) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 2;
-  canvas.height = 256;
-
-  const context = canvas.getContext("2d");
-  if (!context) {
-    return null;
-  }
-
-  const safeDrop = Math.max(0.001, drop);
-  const featherRatio = Math.min(1, Math.max(0, featherDistance / safeDrop));
-
-  for (let y = 0; y < canvas.height; y++) {
-    const t = y / (canvas.height - 1);
-    const alpha =
-      featherRatio <= 0 ? 1 : t <= featherRatio ? t / featherRatio : 1;
-    // alphaMap uses color channels (primarily green), not source pixel alpha.
-    const alphaByte = Math.round(alpha * 255);
-    context.fillStyle = `rgb(${alphaByte}, ${alphaByte}, ${alphaByte})`;
-    context.fillRect(0, canvas.height - y - 1, canvas.width, 1);
-  }
-
-  const texture = new CanvasTexture(canvas);
-  texture.wrapS = ClampToEdgeWrapping;
-  texture.wrapT = ClampToEdgeWrapping;
-  texture.magFilter = LinearFilter;
-  texture.minFilter = LinearFilter;
-  texture.needsUpdate = true;
-
-  return texture;
-}
-
-type FieldEdgeProps = {
-  bottomOpacityFeatherDistance?: number;
-};
-
-export function FieldEdge({
-  bottomOpacityFeatherDistance = defaultBottomOpacityFeatherDistance,
-}: FieldEdgeProps = {}) {
+export function FieldEdge() {
   const groundTexture = useTexture(
     `${import.meta.env.BASE_URL}img/textures/ground.png`,
   );
@@ -150,11 +107,6 @@ export function FieldEdge({
       ),
     [],
   );
-  const bottomAlphaMap = useMemo(
-    () => createBottomOpacityAlphaMap(sideDrop, bottomOpacityFeatherDistance),
-    [bottomOpacityFeatherDistance],
-  );
-
   useMemo(() => {
     groundTexture.wrapS = RepeatWrapping;
     groundTexture.wrapT = RepeatWrapping;
@@ -184,13 +136,7 @@ export function FieldEdge({
       {/* Bottom */}
       <mesh position={[0, sideCenterY, halfD + sideOffset]}>
         <primitive object={bottomGeometry} attach="geometry" />
-        <meshBasicMaterial
-          map={groundTexture}
-          alphaMap={bottomAlphaMap ?? undefined}
-          transparent
-          depthWrite={false}
-          color="#ffffff"
-        />
+        <meshBasicMaterial map={groundTexture} color="#ffffff" />
       </mesh>
     </>
   );
