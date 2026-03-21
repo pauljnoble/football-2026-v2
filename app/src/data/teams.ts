@@ -1,0 +1,40 @@
+import type { TeamData } from '../types';
+
+const teamsData: TeamData = [
+  {
+    name: 'Brazil',
+    code: 'bra',
+    defaultFormation: '4-3-3',
+    playerBgColor: "#97bda9",
+    playerRingColorDark: "#0d311e",
+    playerRingColor: "#174A2F",
+    bgColor: "#174b30",
+    textDisplayColor: "#ffffff",
+    textHighlightColor: "#dce06b",
+    scrimBgColor: "#174b30",
+    scrimTextColor: "#dce06b",
+    uiBgColor: "#0d311e",
+    uiTextColor: "#ffffff",
+    uiTextHighlightColor: "#dce06b",
+    uiBtnBgColor: "#00222E33",
+  },
+  {
+    name: 'England',
+    code: 'eng',
+    defaultFormation: '4-4-2',
+    playerBgColor: "#9dc0e0",
+    playerRingColorDark: "#123654",
+    playerRingColor: "#20547f",
+    bgColor: "#85beee",
+    textDisplayColor: "#ffffff",
+    textHighlightColor: "#153b5b",
+    scrimBgColor: "#00222E",
+    scrimTextColor: "#80DFFF",
+    uiBgColor: "#00222E",
+    uiTextColor: "#ffffff",
+    uiTextHighlightColor: "#6eb6f1",
+    uiBtnBgColor: "#00222E33",
+  },
+];
+
+export default teamsData;
