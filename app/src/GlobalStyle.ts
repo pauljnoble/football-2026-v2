@@ -18,6 +18,7 @@ export const GlobalStyle = createGlobalStyle`
   :root {
     --font-family-default: "ASAP Condensed", georgia, serif;
     --color-background: #0c0d10;
+    --canvas-top: 60px;
   }
 
   body {

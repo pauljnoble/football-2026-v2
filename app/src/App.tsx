@@ -5,11 +5,11 @@ import { animated as a } from "@react-spring/web";
 import styled from "styled-components";
 import { GlobalStyle } from "./GlobalStyle";
 import { PlayerScene } from "./components/PlayerScene";
-import { TeamOverlay } from "./components/TeamOverlay";
 import { ANIMATION_CONFIG } from "./config/animationConfig";
 import { useTeamTransitionManager } from "./hooks/useTeamTransitionManager";
 import { useTeamStore } from "./store/teamStore";
 import { buildFormationSlots } from "./utils/buildFormationSlots";
+import UIOverlay from "./components/UIOverlay";
 
 export default function App() {
   const [frameloopMode, setFrameloopMode] = useState<"always" | "demand">(
@@ -177,7 +177,15 @@ export default function App() {
     <>
       <GlobalStyle />
       <Root style={rootStyles}>
-        <Canvas
+        <UIOverlay
+          teamName={teamName}
+          teamNameSpring={teamNameSpring}
+          isTransitioningTeam={isTransitioningTeam}
+          frameloopMode={frameloopMode}
+          goPrev={goPrev}
+          goNext={goNext}
+        />
+        <StyledCanvas
           style={{ width: "100%", height: "100%", display: "block" }}
           frameloop={frameloopMode}
           dpr={[1, 2]}
@@ -197,22 +205,27 @@ export default function App() {
             playerSprings={playerSprings}
             transitionState={transitionState}
           />
-        </Canvas>
-        <TeamOverlay
-          frameloopMode={frameloopMode}
-          isTransitioningTeam={isTransitioningTeam}
-          teamName={teamName}
-          teamNameSpring={teamNameSpring}
-          goPrev={goPrev}
-          goNext={goNext}
-        />
+        </StyledCanvas>
       </Root>
     </>
   );
 }
 
+const StyledCanvas = styled(Canvas)`
+  width: 100%;
+  height: 100%;
+  display: block;
+  position: absolute;
+  top: var(--canvas-top);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+`;
+
 const Root = styled(a.div)`
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 `;

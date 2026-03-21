@@ -202,7 +202,7 @@ export function Grass({
   modelScale = GRASS_CONFIG.modelScale,
   brightness = 0,
   hueRotation = 0,
-  lineInsetX = 4,
+  lineInsetX = 6,
   lineInsetZ = 2.5,
   lineOpacity = 0.7,
   lineColor = "#ffffff",

@@ -22,6 +22,7 @@ export function useTeamTransitionManager() {
       transitionState === 'entering' || transitionState === 'entered'
         ? 'translateY(0px)'
         : `translateY(-${ANIMATION_CONFIG.teamTransition.nameOffsetYpx}px)`,
+    delay: transitionState === 'entering' ? 0 : 1,
     config: { duration: ANIMATION_CONFIG.teamTransition.nameAnimationMs },
   });
 

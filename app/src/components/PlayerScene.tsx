@@ -11,13 +11,25 @@ import { useTeamStore } from "../store/teamStore";
 import type { Player } from "../types";
 import type { PlayerSlot } from "../utils/buildFormationSlots";
 import Shadow from "./Shadow";
+import { brighten, darken } from "../utils/color";
+import GoalNet from "../scene/GoalNet";
+import {
+  FIELD_WORLD_INNER_DEPTH,
+  FIELD_WORLD_INNER_WIDTH,
+} from "../scene/constants";
 
 const PLAYER_RADIUS = 6;
 const PLAYER_RING_WIDTH = 0.6;
 const PLAYER_SURFACE_OFFSET = 0.03;
 const PLAYER_CENTER_RADIUS = PLAYER_RADIUS - PLAYER_RING_WIDTH;
+const PLAYER_RING_SEGMENTS = 48;
+const PLAYER_CENTER_SEGMENTS = 48;
 const PLAYER_RING_INNER_LINE_WIDTH_NORM = 0.018;
 const PLAYER_RING_INNER_LINE_SOFTNESS_NORM = 0.006;
+const PLAYER_RING_OUTER_LINE_WIDTH_NORM = 0.012;
+const PLAYER_RING_OUTER_LINE_SOFTNESS_NORM = 0.003;
+const PLAYER_RING_OUTER_LINE_FADE_TOP_Y_NORM = 1.0;
+const PLAYER_RING_OUTER_LINE_FADE_BOTTOM_Y_NORM = 0.5;
 const PLAYER_PROFILE_Z_OFFSET = 0.01;
 const HOVER_SCALE = 1.5;
 const DRAG_THRESHOLD_PX = 6;
@@ -104,11 +116,20 @@ function PlayerToken({
   });
   const ringShaderUniforms = useMemo(
     () => ({
-      uInnerColor: { value: new Color(team.playerRingColorDark) },
+      uInnerColor: { value: new Color(darken(team.playerRingColor, 0.4)) },
       uOuterColor: { value: new Color(team.playerRingColor) },
       uInnerRadiusNorm: { value: PLAYER_CENTER_RADIUS / PLAYER_RADIUS },
       uInnerLineWidthNorm: { value: PLAYER_RING_INNER_LINE_WIDTH_NORM },
       uInnerLineSoftnessNorm: { value: PLAYER_RING_INNER_LINE_SOFTNESS_NORM },
+      uOuterLineColor: {
+        value: new Color(brighten(team.playerRingColor, 0.4)),
+      },
+      uOuterLineWidthNorm: { value: PLAYER_RING_OUTER_LINE_WIDTH_NORM },
+      uOuterLineSoftnessNorm: { value: PLAYER_RING_OUTER_LINE_SOFTNESS_NORM },
+      uOuterLineFadeTopYNorm: { value: PLAYER_RING_OUTER_LINE_FADE_TOP_Y_NORM },
+      uOuterLineFadeBottomYNorm: {
+        value: PLAYER_RING_OUTER_LINE_FADE_BOTTOM_Y_NORM,
+      },
       uOpacity: { value: 1 },
     }),
     [],
@@ -149,7 +170,11 @@ function PlayerToken({
             >
               <mesh renderOrder={isActive ? 1101 : 0}>
                 <ringGeometry
-                  args={[PLAYER_CENTER_RADIUS, PLAYER_RADIUS, 32]}
+                  args={[
+                    PLAYER_CENTER_RADIUS,
+                    PLAYER_RADIUS,
+                    PLAYER_RING_SEGMENTS,
+                  ]}
                 />
                 <a.shaderMaterial
                   uniforms={ringShaderUniforms}
@@ -167,6 +192,11 @@ function PlayerToken({
                     uniform float uInnerRadiusNorm;
                     uniform float uInnerLineWidthNorm;
                     uniform float uInnerLineSoftnessNorm;
+                    uniform vec3 uOuterLineColor;
+                    uniform float uOuterLineWidthNorm;
+                    uniform float uOuterLineSoftnessNorm;
+                    uniform float uOuterLineFadeTopYNorm;
+                    uniform float uOuterLineFadeBottomYNorm;
                     uniform float uOpacity;
                     varying vec2 vUv;
 
@@ -181,6 +211,30 @@ function PlayerToken({
                       float bandEnd = innerDist + uInnerLineWidthNorm;
                       float lineMask = 1.0 - smoothstep(innerDist, bandEnd + uInnerLineSoftnessNorm, dist);
                       vec3 ringColorLinear = mix(uOuterColor, uInnerColor, lineMask);
+                      float outerDist = 0.5;
+                      float outerBandStart = outerDist - uOuterLineWidthNorm;
+                      float outerMaskStart = smoothstep(
+                        outerBandStart - uOuterLineSoftnessNorm,
+                        outerBandStart + uOuterLineSoftnessNorm,
+                        dist
+                      );
+                      float outerMaskEnd = smoothstep(
+                        outerDist - uOuterLineSoftnessNorm,
+                        outerDist + uOuterLineSoftnessNorm,
+                        dist
+                      );
+                      float outerLineMask = outerMaskStart - outerMaskEnd;
+                      float outerFadeDenom = max(0.0001, uOuterLineFadeTopYNorm - uOuterLineFadeBottomYNorm);
+                      float outerLineAlphaByY = clamp(
+                        (vUv.y - uOuterLineFadeBottomYNorm) / outerFadeDenom,
+                        0.0,
+                        1.0
+                      );
+                      ringColorLinear = mix(
+                        ringColorLinear,
+                        uOuterLineColor,
+                        outerLineMask * outerLineAlphaByY
+                      );
                       vec3 ringColorSrgb = linearToSrgb(ringColorLinear);
                       gl_FragColor = vec4(ringColorSrgb, uOpacity);
                     }
@@ -195,7 +249,9 @@ function PlayerToken({
               </mesh>
               {/* Slightly inset center to create a subtle ring overhang effect. */}
               <mesh renderOrder={isActive ? 1102 : 1}>
-                <circleGeometry args={[PLAYER_CENTER_RADIUS, 20]} />
+                <circleGeometry
+                  args={[PLAYER_CENTER_RADIUS, PLAYER_CENTER_SEGMENTS]}
+                />
                 <a.meshBasicMaterial
                   color={team.playerBgColor}
                   transparent
@@ -213,7 +269,9 @@ function PlayerToken({
                   position={[0, 0, PLAYER_PROFILE_Z_OFFSET]}
                   renderOrder={isActive ? 1103 : 2}
                 >
-                  <circleGeometry args={[PLAYER_CENTER_RADIUS, 20]} />
+                  <circleGeometry
+                    args={[PLAYER_CENTER_RADIUS, PLAYER_CENTER_SEGMENTS]}
+                  />
                   <a.meshBasicMaterial
                     color="#ffffff"
                     map={profileTexture as any}
@@ -309,6 +367,7 @@ export function PlayerScene({
       <ambientLight intensity={0.72} />
       <directionalLight position={[18, 32, 12]} intensity={1.15} />
       <SceneScrim />
+
       <Field>
         {transitionState === "exited"
           ? null
@@ -328,6 +387,10 @@ export function PlayerScene({
               );
             })}
         <ActivePlayerPanel slots={slots} />
+        <GoalNet
+          fieldWidth={FIELD_WORLD_INNER_WIDTH + 12}
+          fieldHeight={FIELD_WORLD_INNER_DEPTH}
+        />
       </Field>
     </>
   );
