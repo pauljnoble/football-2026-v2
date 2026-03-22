@@ -1,5 +1,4 @@
-import { animated as a, useSpring } from "@react-spring/three";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { FrontSide } from "three";
 import * as THREE from "three";
@@ -15,44 +14,27 @@ const SCRIM_DISTANCE = 18;
 export function SceneScrim() {
   const activePlayerId = useTeamStore((s) => s.activePlayerId);
   const setActivePlayerId = useTeamStore((s) => s.setActivePlayerId);
+  const team = useTeamStore((s) => s.team);
   const meshRef = useRef<THREE.Mesh>(null);
-  const { camera } = useThree();
-  const activePlayerIdRef = useRef(activePlayerId);
-  const [isMounted, setIsMounted] = useState(Boolean(activePlayerId));
-  const [fadeInSpring, fadeInApi] = useSpring(() => ({
-    opacity: 0,
-  }));
+  const materialRef = useRef<THREE.MeshBasicMaterial>(null);
+  const { camera, invalidate } = useThree();
+  const targetOpacityRef = useRef(activePlayerId ? 0.42 : 0);
+  const opacityRef = useRef(activePlayerId ? 0.42 : 0);
+  const dirRef = useRef(new THREE.Vector3());
 
   useEffect(() => {
-    activePlayerIdRef.current = activePlayerId;
-  }, [activePlayerId]);
+    targetOpacityRef.current = activePlayerId ? 0.42 : 0;
+    // Kick demand-loop rendering so fade frames are produced.
+    invalidate();
+  }, [activePlayerId, invalidate]);
 
-  useEffect(() => {
-    if (activePlayerId) {
-      setIsMounted(true);
-      fadeInApi.set({ opacity: 0 });
-      void fadeInApi.start({
-        opacity: 0.42,
-        config: { tension: 220, friction: 26 },
-      });
-      return;
-    }
-
-    void fadeInApi.start({
-      opacity: 0,
-      config: { tension: 220, friction: 26 },
-      onRest: () => {
-        if (!activePlayerIdRef.current) setIsMounted(false);
-      },
-    });
-  }, [activePlayerId, fadeInApi]);
-
-  useFrame(() => {
+  useFrame((_, delta) => {
     const mesh = meshRef.current;
-    if (!mesh || !isMounted) return;
+    const material = materialRef.current;
+    if (!mesh || !material) return;
     if (!(camera instanceof THREE.PerspectiveCamera)) return;
 
-    const dir = new THREE.Vector3();
+    const dir = dirRef.current;
     camera.getWorldDirection(dir);
     mesh.position.copy(camera.position).addScaledVector(dir, SCRIM_DISTANCE);
     mesh.quaternion.copy(camera.quaternion);
@@ -61,9 +43,26 @@ export function SceneScrim() {
     const h = 2 * Math.tan(vFov / 2) * SCRIM_DISTANCE;
     const w = h * camera.aspect;
     mesh.scale.set(w * 1.02, h * 1.02, 1);
-  });
 
-  if (!isMounted) return null;
+    const targetOpacity = targetOpacityRef.current;
+    const nextOpacity = THREE.MathUtils.damp(
+      opacityRef.current,
+      targetOpacity,
+      10,
+      delta,
+    );
+    const snappedOpacity =
+      Math.abs(nextOpacity - targetOpacity) < 0.001
+        ? targetOpacity
+        : nextOpacity;
+    opacityRef.current = snappedOpacity;
+    material.opacity = snappedOpacity;
+
+    if (snappedOpacity !== targetOpacity) {
+      // Continue requesting frames only while opacity is still animating.
+      invalidate();
+    }
+  });
 
   return (
     <mesh
@@ -79,10 +78,11 @@ export function SceneScrim() {
       }
     >
       <planeGeometry args={[1, 1]} />
-      <a.meshBasicMaterial
-        color="#000000"
+      <meshBasicMaterial
+        ref={materialRef}
+        color={team?.bgColor ?? "#000000"}
         transparent
-        opacity={fadeInSpring.opacity}
+        opacity={opacityRef.current}
         depthWrite={false}
         depthTest={false}
         side={FrontSide}

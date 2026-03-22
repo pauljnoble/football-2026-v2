@@ -19,6 +19,10 @@ export const GlobalStyle = createGlobalStyle`
     --font-family-default: "ASAP Condensed", georgia, serif;
     --color-background: #0c0d10;
     --canvas-top: 60px;
+    --dim-side-panel-root-width: 300px;
+    --color-side-panel-bg: #fff;
+    --color-content-text-primary: #272932;
+    --color-content-text-secondary: #52545E;
   }
 
   body {

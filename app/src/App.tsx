@@ -10,6 +10,7 @@ import { useTeamTransitionManager } from "./hooks/useTeamTransitionManager";
 import { useTeamStore } from "./store/teamStore";
 import { buildFormationSlots } from "./utils/buildFormationSlots";
 import UIOverlay from "./components/UIOverlay";
+import PlayerDetails from "./components/PlayerDetails";
 
 export default function App() {
   const [frameloopMode, setFrameloopMode] = useState<"always" | "demand">(
@@ -56,6 +57,7 @@ export default function App() {
 
     const events: Array<keyof WindowEventMap> = [
       "pointerdown",
+      "mousedown",
       "pointermove",
       "mousemove",
       "touchstart",
@@ -63,14 +65,19 @@ export default function App() {
       "wheel",
     ];
 
+    const listenerOptions: AddEventListenerOptions = {
+      passive: true,
+      capture: true,
+    };
+
     for (const eventName of events) {
-      window.addEventListener(eventName, markActive, { passive: true });
+      window.addEventListener(eventName, markActive, listenerOptions);
     }
 
     return () => {
       if (idleTimerRef.current) window.clearTimeout(idleTimerRef.current);
       for (const eventName of events) {
-        window.removeEventListener(eventName, markActive);
+        window.removeEventListener(eventName, markActive, true);
       }
     };
   }, [isTransitioningTeam]);
@@ -185,6 +192,7 @@ export default function App() {
           goPrev={goPrev}
           goNext={goNext}
         />
+        <PlayerDetails />
         <StyledCanvas
           style={{ width: "100%", height: "100%", display: "block" }}
           frameloop={frameloopMode}
