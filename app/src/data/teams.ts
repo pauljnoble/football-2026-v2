@@ -17,7 +17,8 @@ const teamsData: TeamData = [
     uiTextColor: "#ffffff",
     uiTextHighlightColor: "#dce06b",
     uiBtnBgColor: "#00222E33",
-    hueRotation: 0
+    hueRotation: 0,
+    snippet: "Footballing royalty bringing flair, samba rhythm and relentless attacking talent.",
   },
   {
     name: 'England',
@@ -35,7 +36,9 @@ const teamsData: TeamData = [
     uiTextColor: "#ffffff",
     uiTextHighlightColor: "#6eb6f1",
     uiBtnBgColor: "#00222E22",
-    hueRotation: -22
+    hueRotation: -22,
+    snippet: "A deep squad chasing redemption after decades of World Cup heartbreak.",
+
   },
 ];
 

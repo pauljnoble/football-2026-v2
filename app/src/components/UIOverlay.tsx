@@ -73,6 +73,13 @@ const UIOverlay = ({
           <Icon name="arrow-right" />
         </ControlButton>
       </StatsRow>
+
+      <FooterSnippet
+        $dimmed={isTransitioningTeam}
+        style={{ color: team.textHighlightColor }}
+      >
+        {team.snippet}
+      </FooterSnippet>
     </Root>
   );
 };
@@ -236,6 +243,27 @@ const ControlButton = styled.button<{ $bgColor: string }>`
     opacity: 0.5;
     cursor: not-allowed;
   }
+`;
+
+const FooterSnippet = styled(animated.div)<{ $dimmed: boolean }>`
+  position: fixed;
+  bottom: 32px;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  text-align: center;
+  font-weight: 500;
+  max-width: 500px;
+  text-wrap: balance;
+  font-weight: 400;
+  margin: auto;
+  left: 0;
+  font-size: 24px;
+  line-height: 1.3;
+  transform-origin: 50% -200px;
+  transition: all 0.3s ease;
+  opacity: ${({ $dimmed }) => ($dimmed ? 0 : 1)};
+  transform: ${({ $dimmed }) => ($dimmed ? "scale(0.9)" : "scale(1)")};
 `;
 
 export default UIOverlay;
