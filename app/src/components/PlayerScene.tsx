@@ -1,4 +1,5 @@
 import { Billboard } from "@react-three/drei";
+import * as THREE from "three";
 import { animated as a, useSpring } from "@react-spring/three";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Color, FrontSide, Texture, TextureLoader } from "three";
@@ -30,8 +31,13 @@ const PLAYER_RING_OUTER_LINE_WIDTH_NORM = 0.012;
 const PLAYER_RING_OUTER_LINE_SOFTNESS_NORM = 0.003;
 const PLAYER_RING_OUTER_LINE_FADE_TOP_Y_NORM = 1.0;
 const PLAYER_RING_OUTER_LINE_FADE_BOTTOM_Y_NORM = 0.5;
+
+const PLAYER_RING_OUTER_DARK_LINE_WIDTH_NORM = 0.012;
+const PLAYER_RING_OUTER_DARK_LINE_SOFTNESS_NORM = 0.003;
+const PLAYER_RING_OUTER_DARK_LINE_FADE_TOP_Y_NORM = 1.0;
+const PLAYER_RING_OUTER_DARK_LINE_FADE_BOTTOM_Y_NORM = 0.3;
 const PLAYER_PROFILE_Z_OFFSET = 0.01;
-const HOVER_SCALE = 1.5;
+const HOVER_SCALE = 1.33;
 const DRAG_THRESHOLD_PX = 6;
 
 type PlayerSpringStyle = { y: any; opacity: any };
@@ -91,6 +97,16 @@ function PlayerToken({
       profileTextureSrc,
       (loadedTexture) => {
         if (cancelled) return;
+        loadedTexture.colorSpace = THREE.SRGBColorSpace;
+        loadedTexture.center.set(0.5, 0.5);
+        // loadedTexture.rotation = Math.PI / 2;
+        loadedTexture.anisotropy = 8;
+        loadedTexture.wrapS = THREE.ClampToEdgeWrapping;
+        loadedTexture.wrapT = THREE.ClampToEdgeWrapping;
+        loadedTexture.generateMipmaps = false;
+        loadedTexture.minFilter = THREE.LinearFilter;
+        loadedTexture.magFilter = THREE.LinearFilter;
+        loadedTexture.needsUpdate = true;
         setProfileTexture(loadedTexture);
       },
       undefined,
@@ -116,7 +132,7 @@ function PlayerToken({
   });
   const ringShaderUniforms = useMemo(
     () => ({
-      uInnerColor: { value: new Color(darken(team.playerRingColor, 0.4)) },
+      uInnerColor: { value: new Color(darken(team.playerRingColor, 0.3)) },
       uOuterColor: { value: new Color(team.playerRingColor) },
       uInnerRadiusNorm: { value: PLAYER_CENTER_RADIUS / PLAYER_RADIUS },
       uInnerLineWidthNorm: { value: PLAYER_RING_INNER_LINE_WIDTH_NORM },
@@ -130,9 +146,24 @@ function PlayerToken({
       uOuterLineFadeBottomYNorm: {
         value: PLAYER_RING_OUTER_LINE_FADE_BOTTOM_Y_NORM,
       },
+      uOuterDarkLineColor: {
+        value: new Color(darken(team.playerRingColor, 0.2)),
+      },
+      uOuterDarkLineWidthNorm: {
+        value: PLAYER_RING_OUTER_DARK_LINE_WIDTH_NORM,
+      },
+      uOuterDarkLineSoftnessNorm: {
+        value: PLAYER_RING_OUTER_DARK_LINE_SOFTNESS_NORM,
+      },
+      uOuterDarkLineFadeTopYNorm: {
+        value: PLAYER_RING_OUTER_DARK_LINE_FADE_TOP_Y_NORM,
+      },
+      uOuterDarkLineFadeBottomYNorm: {
+        value: PLAYER_RING_OUTER_DARK_LINE_FADE_BOTTOM_Y_NORM,
+      },
       uOpacity: { value: 1 },
     }),
-    [],
+    [team],
   );
 
   useEffect(() => {
@@ -197,6 +228,11 @@ function PlayerToken({
                     uniform float uOuterLineSoftnessNorm;
                     uniform float uOuterLineFadeTopYNorm;
                     uniform float uOuterLineFadeBottomYNorm;
+                    uniform vec3 uOuterDarkLineColor;
+                    uniform float uOuterDarkLineWidthNorm;
+                    uniform float uOuterDarkLineSoftnessNorm;
+                    uniform float uOuterDarkLineFadeTopYNorm;
+                    uniform float uOuterDarkLineFadeBottomYNorm;
                     uniform float uOpacity;
                     varying vec2 vUv;
 
@@ -234,6 +270,29 @@ function PlayerToken({
                         ringColorLinear,
                         uOuterLineColor,
                         outerLineMask * outerLineAlphaByY
+                      );
+                      float outerDarkBandStart = outerDist - uOuterDarkLineWidthNorm;
+                      float outerDarkMaskStart = smoothstep(
+                        outerDarkBandStart - uOuterDarkLineSoftnessNorm,
+                        outerDarkBandStart + uOuterDarkLineSoftnessNorm,
+                        dist
+                      );
+                      float outerDarkMaskEnd = smoothstep(
+                        outerDist - uOuterDarkLineSoftnessNorm,
+                        outerDist + uOuterDarkLineSoftnessNorm,
+                        dist
+                      );
+                      float outerDarkLineMask = outerDarkMaskStart - outerDarkMaskEnd;
+                      float outerDarkFadeDenom = max(0.0001, uOuterDarkLineFadeTopYNorm - uOuterDarkLineFadeBottomYNorm);
+                      float outerDarkLineAlphaByY = clamp(
+                        (uOuterDarkLineFadeTopYNorm - vUv.y) / outerDarkFadeDenom,
+                        0.0,
+                        1.0
+                      );
+                      ringColorLinear = mix(
+                        ringColorLinear,
+                        uOuterDarkLineColor,
+                        outerDarkLineMask * outerDarkLineAlphaByY
                       );
                       vec3 ringColorSrgb = linearToSrgb(ringColorLinear);
                       gl_FragColor = vec4(ringColorSrgb, uOpacity);
@@ -275,13 +334,15 @@ function PlayerToken({
                   <a.meshBasicMaterial
                     color="#ffffff"
                     map={profileTexture as any}
+                    toneMapped={false}
                     transparent
+                    alphaTest={0.04}
                     opacity={springStyle.opacity}
                     depthTest={!isActive}
-                    depthWrite={false}
+                    depthWrite={!isActive}
                     polygonOffset
-                    polygonOffsetFactor={-1}
-                    polygonOffsetUnits={-1}
+                    polygonOffsetFactor={-2}
+                    polygonOffsetUnits={-4}
                     side={FrontSide}
                   />
                 </mesh>

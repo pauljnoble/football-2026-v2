@@ -5,6 +5,7 @@ import { FIELD_WORLD_DEPTH, FIELD_WORLD_WIDTH } from "./constants";
 import { Grass } from "./Grass";
 import { FieldEdge } from "./FieldEdge";
 import { degreesToRadiansRange, FIELD_CONFIG } from "./fieldConfig";
+import { useTeamStore } from "../store/teamStore";
 
 const polarRange = degreesToRadiansRange(FIELD_CONFIG.controls.polarDegrees);
 const azimuthRange = degreesToRadiansRange(
@@ -19,6 +20,7 @@ export function Field({ children }: FieldProps) {
   const grassTexture = useTexture(
     `${import.meta.env.BASE_URL}img/textures/grass.png`,
   );
+  const team = useTeamStore((s) => s.team);
 
   useMemo(() => {
     grassTexture.wrapS = RepeatWrapping;
@@ -47,7 +49,12 @@ export function Field({ children }: FieldProps) {
             side={FrontSide}
           />
         </mesh>
-        <Grass stripeCount={11} stripeOpacity={0.2} stripeColor="#1f3b28" />
+        <Grass
+          hueRotation={team.hueRotation}
+          stripeCount={11}
+          stripeOpacity={0.2}
+          stripeColor="#1f3b28"
+        />
         <FieldEdge />
         {children}
       </group>

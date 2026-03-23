@@ -17,6 +17,7 @@ const teamsData: TeamData = [
     uiTextColor: "#ffffff",
     uiTextHighlightColor: "#dce06b",
     uiBtnBgColor: "#00222E33",
+    hueRotation: 0
   },
   {
     name: 'England',
@@ -33,7 +34,8 @@ const teamsData: TeamData = [
     uiBgColor: "#00222E",
     uiTextColor: "#ffffff",
     uiTextHighlightColor: "#6eb6f1",
-    uiBtnBgColor: "#00222E33",
+    uiBtnBgColor: "#00222E22",
+    hueRotation: -22
   },
 ];
 

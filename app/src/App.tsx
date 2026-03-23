@@ -113,13 +113,20 @@ export default function App() {
     let cancelled = false;
 
     const exitAnimations = playerSpringApi.start((index) => ({
-      to: {
-        y: ANIMATION_CONFIG.playerTransition.hiddenY,
-        opacity: 0,
-      },
+      to: [
+        {
+          y: ANIMATION_CONFIG.playerTransition.exitAnticipationY,
+          opacity: 1,
+          config: ANIMATION_CONFIG.playerTransition.exitAnticipationSpring,
+        },
+        {
+          y: ANIMATION_CONFIG.playerTransition.hiddenY,
+          opacity: 0,
+          config: ANIMATION_CONFIG.playerTransition.spring,
+        },
+      ],
       delay: index * ANIMATION_CONFIG.playerTransition.staggerExitMs,
       immediate: false,
-      config: ANIMATION_CONFIG.playerTransition.spring,
     }));
 
     void Promise.all(exitAnimations).then(() => {

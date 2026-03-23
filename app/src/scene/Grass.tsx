@@ -163,7 +163,7 @@ const createGrassMaterial = (enableHueRotation: boolean) =>
     ${
       enableHueRotation
         ? `
-    if (uHueRotation > 0.001) {
+    if (abs(uHueRotation) > 0.001) {
       vec3 hsv = rgb2hsv(color);
       hsv.x = fract(hsv.x + (uHueRotation / 360.0));
       color = hsv2rgb(hsv);
@@ -222,7 +222,8 @@ export function Grass({
 
   const { scene } = useGLTF(DEFAULT_MODEL_URL) as { scene: THREE.Group };
   const linesTexture = useTexture(DEFAULT_LINES_URL);
-  const includeHueRotation = hueRotation > 0;
+  const includeHueRotation =
+    hueRotation !== undefined && Math.abs(hueRotation) > 0;
 
   const material = React.useMemo(() => {
     const GrassMaterialImpl = createGrassMaterial(includeHueRotation);

@@ -1,19 +1,20 @@
 export type Team = {
-    name: string
-    code: string
-    defaultFormation: string
+    name: string;
+    code: string;
+    defaultFormation: string;
     playerBgColor: string
     playerRingColorDark: string
-    playerRingColor: string
-    bgColor: string
-    textDisplayColor: string
+    playerRingColor: string;
+    bgColor: string;
+    textDisplayColor: string;
     textHighlightColor: string
-    scrimBgColor: string
-    scrimTextColor: string
-    uiBgColor: string
-    uiTextColor: string
-    uiTextHighlightColor: string
-    uiBtnBgColor: string
+    scrimBgColor: string;
+    scrimTextColor: string;
+    uiBgColor: string;
+    uiTextColor: string;
+    uiTextHighlightColor: string;
+    uiBtnBgColor: string;
+    hueRotation?: number;
 }
 
 export type TeamData = Team[]

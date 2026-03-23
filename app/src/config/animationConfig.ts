@@ -2,6 +2,13 @@ export const ANIMATION_CONFIG = {
   frameIdleMs: 2000,
   playerTransition: {
     hiddenY: 7.5,
+    /** Brief dip before exit (anticipation, then spring up). */
+    exitAnticipationY: -0.4,
+    exitAnticipationSpring: {
+      tension: 620,
+      friction: 26,
+      mass: 0.35,
+    },
     staggerExitMs: 40,
     enterDelayMs: 500,
     staggerEnterMs: 70,

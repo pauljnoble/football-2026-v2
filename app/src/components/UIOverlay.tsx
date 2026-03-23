@@ -32,7 +32,15 @@ const UIOverlay = ({
   return (
     <Root>
       <DebugPanel>frameloop: {frameloopMode}</DebugPanel>
-      <Heading style={teamNameSpring}>{teamName.toUpperCase()}</Heading>
+      <Heading style={teamNameSpring}>
+        <Flag>
+          <img
+            src={`${import.meta.env.BASE_URL}img/players/${team.code}/flag.png`}
+            alt={team.name}
+          />
+        </Flag>
+        {teamName.toUpperCase()}
+      </Heading>
       <StatsRow>
         <ControlButton
           type="button"
@@ -44,16 +52,16 @@ const UIOverlay = ({
           <Icon name="arrow-left" />
         </ControlButton>
         <StatCol>
-          <StatLabel $color={team.uiTextHighlightColor}>RANK</StatLabel>
-          <StatValue $color={team.uiTextColor}>{rank}</StatValue>
+          <StatLabel $color={team.textHighlightColor}>RANK</StatLabel>
+          <StatValue $color={team.textDisplayColor}>{rank}</StatValue>
         </StatCol>
         <StatCol>
-          <StatLabel $color={team.uiTextHighlightColor}>ENTRIES</StatLabel>
-          <StatValue $color={team.uiTextColor}>{entries}</StatValue>
+          <StatLabel $color={team.textHighlightColor}>ENTRIES</StatLabel>
+          <StatValue $color={team.textDisplayColor}>{entries}</StatValue>
         </StatCol>
         <StatCol>
-          <StatLabel $color={team.uiTextHighlightColor}>WINS</StatLabel>
-          <StatValue $color={team.uiTextColor}>{wins}</StatValue>
+          <StatLabel $color={team.textHighlightColor}>WINS</StatLabel>
+          <StatValue $color={team.textDisplayColor}>{wins}</StatValue>
         </StatCol>
         <ControlButton
           type="button"
@@ -106,6 +114,65 @@ const Heading = styled(animated.h1)`
   color: #ffffff;
   text-transform: uppercase;
   padding-bottom: 16px;
+  overflow: visible;
+
+  img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+  }
+`;
+
+const Flag = styled.div`
+  width: 52px;
+  height: 52px;
+  position: absolute;
+  top: 0;
+  bottom: 16px;
+  margin: auto;
+  right: calc(100% + 8px);
+  border: 1px solid #ffffff;
+  border-radius: 50%;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    border-radius: 50%;
+    z-index: 1;
+    background-image: linear-gradient(
+      to bottom left,
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0) 50%
+    );
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    border-radius: 50%;
+    z-index: 1;
+    mix-blend-mode: multiply;
+    background-image: linear-gradient(
+      to top right,
+      rgba(0, 0, 0, 0.3),
+      rgba(0, 0, 0, 0) 50%
+    );
+  }
 `;
 
 const StatsRow = styled.div`

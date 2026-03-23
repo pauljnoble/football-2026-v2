@@ -40,5 +40,19 @@ export function brighten(hex: string, amount: number): string {
 }
 
 export function darken(hex: string, amount: number): string {
-  return brighten(hex, -amount);
+  const normalized = normalizeHex(hex);
+  const t = clamp01(amount);
+  const raw = normalized.slice(1);
+
+  const r = parseInt(raw.slice(0, 2), 16);
+  const g = parseInt(raw.slice(2, 4), 16);
+  const b = parseInt(raw.slice(4, 6), 16);
+
+  const darkenChannel = (channel: number): number =>
+    Math.round(channel * (1 - t));
+
+  const toHex = (channel: number): string =>
+    darkenChannel(channel).toString(16).padStart(2, "0");
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
