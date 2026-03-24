@@ -195,6 +195,7 @@ export default function App() {
         <UIOverlay
           teamName={teamName}
           teamNameSpring={teamNameSpring}
+          transitionState={transitionState}
           isTransitioningTeam={isTransitioningTeam}
           frameloopMode={frameloopMode}
           goPrev={goPrev}

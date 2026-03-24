@@ -1,5 +1,5 @@
 /** Max horizontal size of the pitch on screen (CSS px); field uses full viewport width when narrower. */
-export const FIELD_MAX_WIDTH_PX = 1600;
+export const FIELD_MAX_WIDTH_PX = 1200;
 
 /** World units (e.g. metres). Long touchlines run along ±X; goal lines at ±Z. */
 export const FIELD_WORLD_WIDTH = 120;

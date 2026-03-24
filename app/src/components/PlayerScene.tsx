@@ -63,12 +63,14 @@ function PlayerToken({
 }: PlayerTokenProps) {
   const setActivePlayerId = useTeamStore((s) => s.setActivePlayerId);
   const activePlayerId = useTeamStore((s) => s.activePlayerId);
+  const listHoveredPlayerId = useTeamStore((s) => s.listHoveredPlayerId);
   // Group origin = bottom of disc (pivot for hover scale). Mesh is offset +Y by PLAYER_RADIUS so the circle still sits on the field.
   const baseY = PLAYER_SURFACE_OFFSET;
   const [isHovered, setIsHovered] = useState(false);
   const team = useTeamStore((s) => s.team);
   const isActive = activePlayerId === player.id;
-  const scaledUp = isHovered || isActive;
+  const listHoverMatch = listHoveredPlayerId === player.id;
+  const scaledUp = isHovered || isActive || listHoverMatch;
   const profilePictureUrl = (player.profilePictureUrl ?? player.profilePicture)
     ?.trim()
     ?.replace(/^\.\//, "");
@@ -362,10 +364,13 @@ function PlayerToken({
                   gap: 8,
                   pointerEvents: "none",
                   userSelect: "none",
-                  opacity: isHovered && !isActive ? 1 : 0,
+                  opacity: (isHovered || listHoverMatch) && !isActive ? 1 : 0,
                   outline: '2px solid white',
                   boxShadow: '0 2px 4px rgba(0, 0, 0,0.2)',
-                  visibility: isHovered && !isActive ? "visible" : "hidden",
+                  visibility:
+                    (isHovered || listHoverMatch) && !isActive
+                      ? "visible"
+                      : "hidden",
                   transition: "opacity 0.2s ease, visibility 0.2s ease",
                 }}
               >
@@ -390,6 +395,9 @@ export function PlayerScene({
 }: PlayerSceneProps) {
   const activePlayerId = useTeamStore((s) => s.activePlayerId);
   const teamCode = useTeamStore((s) => s.team.code);
+  const setListHoveredPlayerId = useTeamStore(
+    (s) => s.setListHoveredPlayerId,
+  );
   const [isDragging, setIsDragging] = useState(false);
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -404,6 +412,10 @@ export function PlayerScene({
   useEffect(() => {
     isDraggingRef.current = isDragging;
   }, [isDragging]);
+
+  useEffect(() => {
+    if (isDragging) setListHoveredPlayerId(null);
+  }, [isDragging, setListHoveredPlayerId]);
 
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {

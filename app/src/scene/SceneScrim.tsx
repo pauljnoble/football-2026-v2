@@ -6,6 +6,7 @@ import { useTeamStore } from "../store/teamStore";
 
 /** Distance along view ray — plane is sized to cover the frustum at this depth */
 const SCRIM_DISTANCE = 18;
+const TARGET_OPACITY = 0.66;
 
 /**
  * Full-viewport dimming quad in front of the camera (only while a player is active).
@@ -18,12 +19,12 @@ export function SceneScrim() {
   const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.MeshBasicMaterial>(null);
   const { camera, invalidate } = useThree();
-  const targetOpacityRef = useRef(activePlayerId ? 0.42 : 0);
-  const opacityRef = useRef(activePlayerId ? 0.42 : 0);
+  const targetOpacityRef = useRef(activePlayerId ? TARGET_OPACITY : 0);
+  const opacityRef = useRef(activePlayerId ? TARGET_OPACITY : 0);
   const dirRef = useRef(new THREE.Vector3());
 
   useEffect(() => {
-    targetOpacityRef.current = activePlayerId ? 0.42 : 0;
+    targetOpacityRef.current = activePlayerId ? TARGET_OPACITY : 0;
     // Kick demand-loop rendering so fade frames are produced.
     invalidate();
   }, [activePlayerId, invalidate]);
@@ -82,10 +83,11 @@ export function SceneScrim() {
         ref={materialRef}
         color={team?.bgColor ?? "#000000"}
         transparent
-        opacity={opacityRef.current}
+        opacity={1}
         depthWrite={false}
         depthTest={false}
         side={FrontSide}
+        toneMapped={false}
       />
     </mesh>
   );

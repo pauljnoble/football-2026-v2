@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { animated as a, useSpring } from "@react-spring/web";
 import styled from "styled-components";
 import { useTeamStore } from "../store/teamStore";

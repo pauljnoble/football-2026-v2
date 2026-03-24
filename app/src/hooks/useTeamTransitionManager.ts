@@ -16,13 +16,8 @@ export function useTeamTransitionManager() {
   const transitionState = useTeamStore((state) => state.transitionState);
 
   const teamNameSpring = useSpring({
-    opacity:
-      transitionState === 'entering' || transitionState === 'entered' ? 1 : 0,
-    transform:
-      transitionState === 'entering' || transitionState === 'entered'
-        ? 'translateY(0px)'
-        : `translateY(-${ANIMATION_CONFIG.teamTransition.nameOffsetYpx}px)`,
-    delay: transitionState === 'entering' ? 300 : 0,
+    // Motion is per character; wrapper only hides the block while `exited`.
+    opacity: transitionState === 'exited' ? 0 : 1,
     config: { duration: ANIMATION_CONFIG.teamTransition.nameAnimationMs },
   });
 
@@ -89,7 +84,11 @@ export function useTeamTransitionManager() {
     if (!pendingTeam) return;
 
     void (async () => {
-      useTeamStore.setState({ transitionState: 'exited', activePlayerId: null });
+      useTeamStore.setState({
+        transitionState: 'exited',
+        activePlayerId: null,
+        listHoveredPlayerId: null,
+      });
 
       const nextPlayers = getPlayersByTeamCode(pendingTeam.code);
       const nextFormation =
@@ -108,6 +107,7 @@ export function useTeamTransitionManager() {
         formation: nextFormation,
         transitionState: 'entering',
         activePlayerId: null,
+        listHoveredPlayerId: null,
       });
       pendingTeamRef.current = null;
     })();

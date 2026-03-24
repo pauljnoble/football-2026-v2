@@ -1,12 +1,14 @@
 import styled from "styled-components";
-import { animated } from "@react-spring/web";
+import { animated, useSpring } from "@react-spring/web";
 import type { ComponentProps } from "react";
-import { useTeamStore } from "../store/teamStore";
+import { useTeamStore, type TeamTransitionState } from "../store/teamStore";
 import Icon from "./Icon";
+import { StaggeredTeamHeading } from "./StaggeredTeamHeading";
 
 type UIOverlayProps = {
   teamName: string;
-  teamNameSpring: ComponentProps<typeof Heading>["style"];
+  teamNameSpring: ComponentProps<typeof animated.span>["style"];
+  transitionState: TeamTransitionState;
   isTransitioningTeam: boolean;
   frameloopMode: "always" | "demand";
   goPrev: () => void;
@@ -19,6 +21,7 @@ type UIOverlayProps = {
 const UIOverlay = ({
   teamName,
   teamNameSpring,
+  transitionState,
   isTransitioningTeam,
   frameloopMode,
   goPrev,
@@ -28,55 +31,67 @@ const UIOverlay = ({
   wins = "04",
 }: UIOverlayProps) => {
   const team = useTeamStore((state) => state.team);
+  const isPlayerActive = useTeamStore((state) => state.activePlayerId !== null);
+
+  const topSpring = useSpring({
+    opacity: isPlayerActive ? 0.1 : 1,
+  });
 
   return (
     <Root>
       <DebugPanel>frameloop: {frameloopMode}</DebugPanel>
-      <Heading style={teamNameSpring}>
-        <Flag>
-          <img
-            src={`${import.meta.env.BASE_URL}img/players/${team.code}/flag.png`}
-            alt={team.name}
+      <Top style={topSpring}>
+        <Heading>
+          <StaggeredTeamHeading
+            teamName={teamName}
+            transitionState={transitionState}
+            wrapperStyle={teamNameSpring}
+            flag={
+              <Flag>
+                <img
+                  src={`${import.meta.env.BASE_URL}img/players/${team.code}/flag.png`}
+                  alt={team.name}
+                />
+              </Flag>
+            }
           />
-        </Flag>
-        {teamName.toUpperCase()}
-      </Heading>
-      <StatsRow>
-        <ControlButton
-          type="button"
-          aria-label="Previous team"
-          onClick={goPrev}
-          disabled={isTransitioningTeam}
-          $bgColor={team.uiBtnBgColor}
-        >
-          <Icon name="arrow-left" />
-        </ControlButton>
-        <StatCol>
-          <StatLabel $color={team.textHighlightColor}>RANK</StatLabel>
-          <StatValue $color={team.textDisplayColor}>{rank}</StatValue>
-        </StatCol>
-        <StatCol>
-          <StatLabel $color={team.textHighlightColor}>ENTRIES</StatLabel>
-          <StatValue $color={team.textDisplayColor}>{entries}</StatValue>
-        </StatCol>
-        <StatCol>
-          <StatLabel $color={team.textHighlightColor}>WINS</StatLabel>
-          <StatValue $color={team.textDisplayColor}>{wins}</StatValue>
-        </StatCol>
-        <ControlButton
-          type="button"
-          aria-label="Next team"
-          onClick={goNext}
-          disabled={isTransitioningTeam}
-          $bgColor={team.uiBtnBgColor}
-        >
-          <Icon name="arrow-right" />
-        </ControlButton>
-      </StatsRow>
-
+        </Heading>
+        <StatsRow>
+          <ControlButton
+            type="button"
+            aria-label="Previous team"
+            onClick={goPrev}
+            disabled={isTransitioningTeam}
+            $bgColor={team.uiBtnBgColor}
+          >
+            <Icon name="arrow-left" />
+          </ControlButton>
+          <StatCol>
+            <StatLabel $color={team.textHighlightColor}>RANK</StatLabel>
+            <StatValue $color={team.textDisplayColor}>{rank}</StatValue>
+          </StatCol>
+          <StatCol>
+            <StatLabel $color={team.textHighlightColor}>ENTRIES</StatLabel>
+            <StatValue $color={team.textDisplayColor}>{entries}</StatValue>
+          </StatCol>
+          <StatCol>
+            <StatLabel $color={team.textHighlightColor}>WINS</StatLabel>
+            <StatValue $color={team.textDisplayColor}>{wins}</StatValue>
+          </StatCol>
+          <ControlButton
+            type="button"
+            aria-label="Next team"
+            onClick={goNext}
+            disabled={isTransitioningTeam}
+            $bgColor={team.uiBtnBgColor}
+          >
+            <Icon name="arrow-right" />
+          </ControlButton>
+        </StatsRow>
+      </Top>
       <FooterSnippet
         $dimmed={isTransitioningTeam}
-        style={{ color: team.textHighlightColor }}
+        style={{ color: team.textHighlightColor, ...topSpring }}
       >
         {team.snippet}
       </FooterSnippet>
@@ -98,6 +113,13 @@ const Root = styled.div`
   padding: 24px 24px 12px;
 `;
 
+const Top = styled(animated.div)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+`;
+
 const DebugPanel = styled.div`
   position: fixed;
   bottom: 12px;
@@ -112,7 +134,7 @@ const DebugPanel = styled.div`
   text-transform: lowercase;
 `;
 
-const Heading = styled(animated.h1)`
+const Heading = styled.h1`
   margin: 0;
   font-size: clamp(64px, 14vw, 120px);
   line-height: 0.9;

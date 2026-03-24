@@ -24,7 +24,14 @@ export const ANIMATION_CONFIG = {
   },
   teamTransition: {
     nameAnimationMs: 220,
+    /** Delay between each character (and flag) when the heading exits. */
+    nameExitStaggerMs: 28,
+    /** Delay between each character (and flag) when the heading enters. */
+    nameEnterStaggerMs: 32,
+    /** Wait before the first character begins entering (was wrapper fade delay). */
+    nameEnterBaseDelayMs: 300,
     exitedPauseMs: 180,
-    nameOffsetYpx: 10,
+    /** Exit: move up. Enter: rise from below. */
+    nameTravelYpx: 36,
   },
 } as const;

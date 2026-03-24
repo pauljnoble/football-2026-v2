@@ -38,18 +38,20 @@ function FitFrustum({ targetX }: { targetX: number | null }) {
     if (!(camera instanceof THREE.PerspectiveCamera)) return;
 
     const dist = CAMERA_POSITION.distanceTo(CAMERA_LOOK_AT);
-    
+
     // Target physical pixels the field should occupy horizontally on the screen.
     // Clamped to FIELD_MAX_WIDTH_PX, but shrinks on smaller screens.
     const targetPx = Math.min(width, FIELD_MAX_WIDTH_PX);
-    
-    // Calculate the necessary horizontal view volume (hWorld) so that the 
+
+    // Calculate the necessary horizontal view volume (hWorld) so that the
     // physical field width (FIELD_WORLD_WIDTH) spans exactly `targetPx` pixels.
     const hWorld = (FIELD_WORLD_WIDTH * width) / targetPx;
-    
+
     // Convert to vertical view volume and corresponding FOV
     const vWorldRequired = hWorld * (height / width);
-    const requiredFov = THREE.MathUtils.radToDeg(2 * Math.atan(vWorldRequired / (2 * dist)));
+    const requiredFov = THREE.MathUtils.radToDeg(
+      2 * Math.atan(vWorldRequired / (2 * dist)),
+    );
 
     camera.fov = requiredFov;
     camera.aspect = width / height;

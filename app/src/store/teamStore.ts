@@ -18,6 +18,8 @@ type TeamStore = {
   transitionState: TeamTransitionState
   activePlayerId: string | null
   setActivePlayerId: (id: string | null) => void
+  listHoveredPlayerId: string | null
+  setListHoveredPlayerId: (id: string | null) => void
 }
 
 const typedTeamsData: TeamData = teamsData;
@@ -47,4 +49,6 @@ export const useTeamStore = create<TeamStore>((set) => ({
   transitionState: 'entered',
   activePlayerId: null,
   setActivePlayerId: (activePlayerId) => set({ activePlayerId }),
+  listHoveredPlayerId: null,
+  setListHoveredPlayerId: (listHoveredPlayerId) => set({ listHoveredPlayerId }),
 }));

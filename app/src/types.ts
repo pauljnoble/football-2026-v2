@@ -13,6 +13,8 @@ export type Team = {
     uiBgColor: string;
     uiTextColor: string;
     uiTextHighlightColor: string;
+    uiAccentBgColor: string;
+    uiAccentTextColor: string;
     uiBtnBgColor: string;
     snippet: string;
     hueRotation?: number;
