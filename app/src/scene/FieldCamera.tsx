@@ -3,13 +3,15 @@ import { PerspectiveCamera } from "@react-three/drei";
 import { useFrame, useStore, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
+import { FIELD_WORLD_WIDTH, FIELD_MAX_WIDTH_PX } from "./constants";
+
 const FOV = 40;
 
 /**
  * Camera pose is in world units (metres): X across field, Y up, Z along pitch depth.
  * Adjust this directly to position the camera.
  */
-const CAMERA_POSITION = new THREE.Vector3(0, 62, 95);
+const CAMERA_POSITION = new THREE.Vector3(0, 66, 85);
 const CAMERA_LOOK_AT = new THREE.Vector3(0, 0, 0);
 
 function applyCameraPose(cam: THREE.PerspectiveCamera, targetX = 0) {
@@ -35,7 +37,21 @@ function FitFrustum({ targetX }: { targetX: number | null }) {
     const camera = store.getState().camera;
     if (!(camera instanceof THREE.PerspectiveCamera)) return;
 
-    camera.fov = FOV;
+    const dist = CAMERA_POSITION.distanceTo(CAMERA_LOOK_AT);
+    
+    // Target physical pixels the field should occupy horizontally on the screen.
+    // Clamped to FIELD_MAX_WIDTH_PX, but shrinks on smaller screens.
+    const targetPx = Math.min(width, FIELD_MAX_WIDTH_PX);
+    
+    // Calculate the necessary horizontal view volume (hWorld) so that the 
+    // physical field width (FIELD_WORLD_WIDTH) spans exactly `targetPx` pixels.
+    const hWorld = (FIELD_WORLD_WIDTH * width) / targetPx;
+    
+    // Convert to vertical view volume and corresponding FOV
+    const vWorldRequired = hWorld * (height / width);
+    const requiredFov = THREE.MathUtils.radToDeg(2 * Math.atan(vWorldRequired / (2 * dist)));
+
+    camera.fov = requiredFov;
     camera.aspect = width / height;
     camera.near = 0.1;
     camera.far = 200;

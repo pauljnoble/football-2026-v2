@@ -18,6 +18,8 @@ const teamsData: TeamData = [
     uiTextHighlightColor: "#dce06b",
     uiBtnBgColor: "#00222E33",
     hueRotation: 0,
+    cameraAzimuth: 1.5,
+    cameraPolar: 0.8,
     snippet: "Footballing royalty bringing flair, samba rhythm and relentless attacking talent.",
   },
   {
@@ -37,6 +39,8 @@ const teamsData: TeamData = [
     uiTextHighlightColor: "#6eb6f1",
     uiBtnBgColor: "#00222E22",
     hueRotation: -22,
+    cameraAzimuth: -2,
+    cameraPolar: -0.5,
     snippet: "A deep squad chasing redemption after decades of World Cup heartbreak.",
 
   },

@@ -1,9 +1,8 @@
-import { Billboard } from "@react-three/drei";
+import { Billboard, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { animated as a, useSpring } from "@react-spring/three";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Color, FrontSide, Texture, TextureLoader } from "three";
-import { ActivePlayerPanel } from "./ActivePlayerPanel";
 import { Field } from "../scene/Field";
 import { FieldPerspectiveCamera } from "../scene/FieldCamera";
 import { SceneScrim } from "../scene/SceneScrim";
@@ -347,6 +346,34 @@ function PlayerToken({
                   />
                 </mesh>
               ) : null}
+              <Html
+                center
+                position={[0, PLAYER_RADIUS + 2, 0]}
+                style={{
+                  backgroundColor: team.uiBgColor,
+                  color: team.uiTextColor,
+                  padding: "6px 14px",
+                  borderRadius: "20px",
+                  fontSize: 24,
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  opacity: isHovered && !isActive ? 1 : 0,
+                  outline: '2px solid white',
+                  boxShadow: '0 2px 4px rgba(0, 0, 0,0.2)',
+                  visibility: isHovered && !isActive ? "visible" : "hidden",
+                  transition: "opacity 0.2s ease, visibility 0.2s ease",
+                }}
+              >
+                <span style={{ color: team.uiTextHighlightColor, fontWeight: 700, opacity: 0.9 }}>
+                  {player.number}
+                </span>
+                <span style={{ color: team.uiTextColor }}>{player.name}</span>
+              </Html>
             </group>
           </a.group>
         </a.group>
@@ -447,7 +474,6 @@ export function PlayerScene({
                 />
               );
             })}
-        <ActivePlayerPanel slots={slots} />
         <GoalNet
           fieldWidth={FIELD_WORLD_INNER_WIDTH + 12}
           fieldHeight={FIELD_WORLD_INNER_DEPTH}

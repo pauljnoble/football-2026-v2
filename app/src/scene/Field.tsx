@@ -1,6 +1,8 @@
 import { useMemo, type ReactNode } from "react";
 import { PresentationControls, useTexture } from "@react-three/drei";
 import { FrontSide, RepeatWrapping, SRGBColorSpace } from "three";
+import * as THREE from "three";
+import { useSpring, animated as a } from "@react-spring/three";
 import { FIELD_WORLD_DEPTH, FIELD_WORLD_WIDTH } from "./constants";
 import { Grass } from "./Grass";
 import { FieldEdge } from "./FieldEdge";
@@ -30,6 +32,13 @@ export function Field({ children }: FieldProps) {
     grassTexture.needsUpdate = true;
   }, [grassTexture]);
 
+  const rotationSpring = useSpring({
+    azimuth: THREE.MathUtils.degToRad(team.cameraAzimuth ?? 0),
+    polar: THREE.MathUtils.degToRad(team.cameraPolar ?? 0),
+    delay: 100,
+    config: { duration: 1000 }
+  });
+
   return (
     <PresentationControls
       global
@@ -40,24 +49,26 @@ export function Field({ children }: FieldProps) {
       azimuth={azimuthRange}
       rotation={[0, 0, 0]}
     >
-      <group>
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[FIELD_WORLD_WIDTH, FIELD_WORLD_DEPTH]} />
-          <meshBasicMaterial
-            map={grassTexture}
-            color="#ffffff"
-            side={FrontSide}
+      <a.group rotation-y={rotationSpring.azimuth} rotation-x={rotationSpring.polar}>
+        <group>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[FIELD_WORLD_WIDTH, FIELD_WORLD_DEPTH]} />
+            <meshBasicMaterial
+              map={grassTexture}
+              color="#ffffff"
+              side={FrontSide}
+            />
+          </mesh>
+          <Grass
+            hueRotation={team.hueRotation}
+            stripeCount={11}
+            stripeOpacity={0.2}
+            stripeColor="#1f3b28"
           />
-        </mesh>
-        <Grass
-          hueRotation={team.hueRotation}
-          stripeCount={11}
-          stripeOpacity={0.2}
-          stripeColor="#1f3b28"
-        />
-        <FieldEdge />
-        {children}
-      </group>
+          <FieldEdge />
+          {children}
+        </group>
+      </a.group>
     </PresentationControls>
   );
 }

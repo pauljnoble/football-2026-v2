@@ -16,6 +16,8 @@ export type Team = {
     uiBtnBgColor: string;
     snippet: string;
     hueRotation?: number;
+    cameraAzimuth?: number;
+    cameraPolar?: number;
 }
 
 export type TeamData = Team[]

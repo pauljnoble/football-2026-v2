@@ -11,6 +11,7 @@ import { useTeamStore } from "./store/teamStore";
 import { buildFormationSlots } from "./utils/buildFormationSlots";
 import UIOverlay from "./components/UIOverlay";
 import PlayerDetails from "./components/PlayerDetails";
+import PlayerList from "./components/PlayerList";
 
 export default function App() {
   const [frameloopMode, setFrameloopMode] = useState<"always" | "demand">(
@@ -200,6 +201,7 @@ export default function App() {
           goNext={goNext}
         />
         <PlayerDetails />
+        <PlayerList />
         <StyledCanvas
           style={{ width: "100%", height: "100%", display: "block" }}
           frameloop={frameloopMode}
