@@ -3,7 +3,8 @@ import { PerspectiveCamera } from "@react-three/drei";
 import { useFrame, useStore, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
-import { FIELD_WORLD_WIDTH, FIELD_MAX_WIDTH_PX } from "./constants";
+import { FIELD_WORLD_WIDTH } from "./constants";
+import { useTeamStore } from "../store/teamStore";
 
 const FOV = 40;
 
@@ -32,41 +33,48 @@ function FitFrustum({ targetX }: { targetX: number | null }) {
   const { width, height } = useThree((s) => s.size);
   const invalidate = useThree((s) => s.invalidate);
   const cameraXRef = useRef(0);
+  const fieldMaxWidthPx = useTeamStore((state) => state.fieldMaxWidthPx);
+  const viewXOffset = useTeamStore((state) => state.viewXOffset);
+  const cameraFovRef = useRef<number | null>(null);
+  const cameraViewXOffsetRef = useRef<number>(0);
+
+  // Calculate target properties for camera
+  const dist = CAMERA_POSITION.distanceTo(CAMERA_LOOK_AT);
+  const targetPx = Math.min(width, fieldMaxWidthPx);
+  const hWorld = (FIELD_WORLD_WIDTH * width) / targetPx;
+  const vWorldRequired = hWorld * (height / width);
+  const targetFov = THREE.MathUtils.radToDeg(
+    2 * Math.atan(vWorldRequired / (2 * dist)),
+  );
 
   useLayoutEffect(() => {
     const camera = store.getState().camera;
     if (!(camera instanceof THREE.PerspectiveCamera)) return;
 
-    const dist = CAMERA_POSITION.distanceTo(CAMERA_LOOK_AT);
-
-    // Target physical pixels the field should occupy horizontally on the screen.
-    // Clamped to FIELD_MAX_WIDTH_PX, but shrinks on smaller screens.
-    const targetPx = Math.min(width, FIELD_MAX_WIDTH_PX);
-
-    // Calculate the necessary horizontal view volume (hWorld) so that the
-    // physical field width (FIELD_WORLD_WIDTH) spans exactly `targetPx` pixels.
-    const hWorld = (FIELD_WORLD_WIDTH * width) / targetPx;
-
-    // Convert to vertical view volume and corresponding FOV
-    const vWorldRequired = hWorld * (height / width);
-    const requiredFov = THREE.MathUtils.radToDeg(
-      2 * Math.atan(vWorldRequired / (2 * dist)),
-    );
-
-    camera.fov = requiredFov;
+    if (cameraFovRef.current === null) {
+      cameraFovRef.current = targetFov;
+      camera.fov = targetFov;
+    }
+    
     camera.aspect = width / height;
     camera.near = 0.1;
     camera.far = 200;
+
+    if (cameraViewXOffsetRef.current === 0) {
+      camera.clearViewOffset();
+    } else {
+      camera.setViewOffset(width, height, cameraViewXOffsetRef.current, 0, width, height);
+    }
 
     camera.updateProjectionMatrix();
     applyCameraPose(camera, cameraXRef.current);
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
-  }, [height, store, width]);
+  }, [height, store, width, targetFov]);
 
   useEffect(() => {
     invalidate();
-  }, [invalidate, targetX]);
+  }, [invalidate, targetX, targetFov, viewXOffset]);
 
   useFrame((_, delta) => {
     const camera = store.getState().camera;
@@ -80,12 +88,55 @@ function FitFrustum({ targetX }: { targetX: number | null }) {
       delta,
     );
     const snappedX = Math.abs(nextX - desiredX) < 0.01 ? desiredX : nextX;
-    cameraXRef.current = snappedX;
+    
+    let needsUpdate = false;
+    
+    if (snappedX !== cameraXRef.current) {
+      cameraXRef.current = snappedX;
+      applyCameraPose(camera, snappedX);
+      camera.updateMatrixWorld();
+      needsUpdate = true;
+    }
+    
+    // Animate FOV
+    if (cameraFovRef.current !== null) {
+      const nextFov = THREE.MathUtils.damp(
+        cameraFovRef.current,
+        targetFov,
+        3.5,
+        delta,
+      );
+      const snappedFov = Math.abs(nextFov - targetFov) < 0.01 ? targetFov : nextFov;
+      if (snappedFov !== camera.fov) {
+        cameraFovRef.current = snappedFov;
+        camera.fov = snappedFov;
+        camera.updateProjectionMatrix();
+        needsUpdate = true;
+      }
+    }
 
-    applyCameraPose(camera, snappedX);
-    camera.updateMatrixWorld();
+    // Animate ViewXOffset
+    const nextViewXOffset = THREE.MathUtils.damp(
+      cameraViewXOffsetRef.current,
+      viewXOffset,
+      3.5,
+      delta,
+    );
+    const snappedViewXOffset = Math.abs(nextViewXOffset - viewXOffset) < 0.01 ? viewXOffset : nextViewXOffset;
+    
+    if (snappedViewXOffset !== cameraViewXOffsetRef.current) {
+      cameraViewXOffsetRef.current = snappedViewXOffset;
+      if (snappedViewXOffset === 0) {
+        camera.clearViewOffset();
+      } else {
+        // Negate to make positive slider pull the scene right (feels more natural)
+        camera.setViewOffset(width, height, -snappedViewXOffset, 0, width, height);
+      }
+      camera.updateProjectionMatrix();
+      needsUpdate = true;
+    }
 
-    if (snappedX !== desiredX) invalidate();
+    if (needsUpdate) invalidate();
   });
 
   return null;

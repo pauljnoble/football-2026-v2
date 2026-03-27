@@ -20,6 +20,10 @@ type TeamStore = {
   setActivePlayerId: (id: string | null) => void
   listHoveredPlayerId: string | null
   setListHoveredPlayerId: (id: string | null) => void
+  fieldMaxWidthPx: number
+  setFieldMaxWidthPx: (width: number) => void
+  viewXOffset: number
+  setViewXOffset: (offset: number) => void
 }
 
 const typedTeamsData: TeamData = teamsData;
@@ -51,4 +55,8 @@ export const useTeamStore = create<TeamStore>((set) => ({
   setActivePlayerId: (activePlayerId) => set({ activePlayerId }),
   listHoveredPlayerId: null,
   setListHoveredPlayerId: (listHoveredPlayerId) => set({ listHoveredPlayerId }),
+  fieldMaxWidthPx: 1200,
+  setFieldMaxWidthPx: (fieldMaxWidthPx) => set({ fieldMaxWidthPx }),
+  viewXOffset: 0,
+  setViewXOffset: (viewXOffset) => set({ viewXOffset }),
 }));
