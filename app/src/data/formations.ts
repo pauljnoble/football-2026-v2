@@ -28,7 +28,7 @@ const formations: FormationData = [
         name: '4-4-2',
         positions: [
             // GK
-            { x: -0.55, y: 0, z: 0 },
+            { x: -0.45, y: 0, z: 0 },
 
             // Back 4
             { x: -0.30, y: 0, z: -0.36 },

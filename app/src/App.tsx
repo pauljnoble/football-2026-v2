@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { GlobalStyle } from "./GlobalStyle";
 import { PlayerScene } from "./components/PlayerScene";
 import { ANIMATION_CONFIG } from "./config/animationConfig";
+import { LAYOUT_CONFIG } from "./config/layoutConfig";
 import { useTeamTransitionManager } from "./hooks/useTeamTransitionManager";
 import { useTeamStore } from "./store/teamStore";
 import { buildFormationSlots } from "./utils/buildFormationSlots";
@@ -22,6 +23,8 @@ export default function App() {
   const players = useTeamStore((state) => state.players);
   const formation = useTeamStore((state) => state.formation);
   const team = useTeamStore((state) => state.team);
+  const isPlayerListVisible = useTeamStore((state) => state.isPlayerListVisible);
+  const setFieldMaxWidthPx = useTeamStore((state) => state.setFieldMaxWidthPx);
 
   const {
     isTransitioningTeam,
@@ -43,6 +46,31 @@ export default function App() {
     config: ANIMATION_CONFIG.playerTransition.resetSpring,
     immediate: true,
   }));
+
+  useEffect(() => {
+    const updateFieldMaxWidth = () => {
+      const viewportWidth = window.innerWidth;
+      const isMidViewport =
+        viewportWidth > LAYOUT_CONFIG.listVisibleMidViewportMinPx &&
+        viewportWidth < LAYOUT_CONFIG.listVisibleMidViewportMaxPx;
+      const reducedWidth =
+        LAYOUT_CONFIG.baseMaxPitchWidthPx -
+        LAYOUT_CONFIG.listVisibleMidViewportReductionPx;
+      const nextWidth =
+        isPlayerListVisible && isMidViewport
+          ? reducedWidth
+          : LAYOUT_CONFIG.baseMaxPitchWidthPx;
+
+      setFieldMaxWidthPx(nextWidth);
+    };
+
+    updateFieldMaxWidth();
+    window.addEventListener("resize", updateFieldMaxWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateFieldMaxWidth);
+    };
+  }, [isPlayerListVisible, setFieldMaxWidthPx]);
 
   useEffect(() => {
     const idleMs = ANIMATION_CONFIG.frameIdleMs;

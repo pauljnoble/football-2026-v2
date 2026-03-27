@@ -3,7 +3,8 @@ export type Team = {
     code: string;
     defaultFormation: string;
     playerBgColor: string
-    playerRingColorDark: string
+    playerRingColorDark: string;
+    groupName: string;
     playerRingColor: string;
     bgColor: string;
     textDisplayColor: string;

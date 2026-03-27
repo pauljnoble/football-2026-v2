@@ -15,7 +15,7 @@ type UIOverlayProps = {
   goNext: () => void;
   rank?: string;
   entries?: string;
-  wins?: string;
+  groupName?: string;
 };
 
 const UIOverlay = ({
@@ -28,9 +28,12 @@ const UIOverlay = ({
   goNext,
   rank = "#5",
   entries = "25",
-  wins = "04",
+  groupName = "G",
 }: UIOverlayProps) => {
   const team = useTeamStore((state) => state.team);
+  const isPlayerListVisible = useTeamStore(
+    (state) => state.isPlayerListVisible,
+  );
   const isPlayerActive = useTeamStore((state) => state.activePlayerId !== null);
 
   const topSpring = useSpring({
@@ -38,7 +41,7 @@ const UIOverlay = ({
   });
 
   return (
-    <Root>
+    <Root $isPlayerListVisible={isPlayerListVisible}>
       <DebugPanel>frameloop: {frameloopMode}</DebugPanel>
       <Top style={topSpring}>
         <Heading>
@@ -75,8 +78,8 @@ const UIOverlay = ({
             <StatValue $color={team.textDisplayColor}>{entries}</StatValue>
           </StatCol>
           <StatCol>
-            <StatLabel $color={team.textHighlightColor}>WINS</StatLabel>
-            <StatValue $color={team.textDisplayColor}>{wins}</StatValue>
+            <StatLabel $color={team.textHighlightColor}>GROUP</StatLabel>
+            <StatValue $color={team.textDisplayColor}>{groupName}</StatValue>
           </StatCol>
           <ControlButton
             type="button"
@@ -99,12 +102,9 @@ const UIOverlay = ({
   );
 };
 
-const Root = styled.div`
+const Root = styled.div<{ $isPlayerListVisible: boolean }>`
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 320px;
+  inset: 0;
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -220,9 +220,9 @@ const StatCol = styled.div`
 
 const StatLabel = styled.div<{ $color: string }>`
   color: ${({ $color }) => $color};
-  font-size: clamp(16px, 3.2vw, 22px);
+  font-size: clamp(16px, 3.2vw, 20px);
   line-height: 0.88;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.01em;
   transition: color 300ms ease;
   transition-delay: 100ms;
@@ -233,6 +233,7 @@ const StatValue = styled.div<{ $color: string }>`
   font-size: clamp(20px, 7.2vw, 48px);
   line-height: 0.84;
   font-weight: 800;
+  padding-top: 2px;
 `;
 
 const ControlButton = styled.button<{ $bgColor: string }>`
@@ -283,8 +284,7 @@ const FooterSnippet = styled(animated.div)<{ $dimmed: boolean }>`
   font-size: 24px;
   line-height: 1.3;
   transform-origin: 50% -200px;
-  transition: all 0.3s ease;
-  opacity: ${({ $dimmed }) => ($dimmed ? 0 : 1)};
+  transition: transform 0.3s ease;
   transform: ${({ $dimmed }) => ($dimmed ? "scale(0.9)" : "scale(1)")};
 `;
 

@@ -33,5 +33,14 @@ export const ANIMATION_CONFIG = {
     exitedPauseMs: 180,
     /** Exit: move up. Enter: rise from below. */
     nameTravelYpx: 36,
+    listAnimationMs: 220,
+    /** Delay between header/list row exits in the player list. */
+    listExitStaggerMs: 22,
+    /** Delay between header/list row enters in the player list. */
+    listEnterStaggerMs: 26,
+    /** Small pause before the player list starts entering. */
+    listEnterBaseDelayMs: 160,
+    /** Exit: move up. Enter: rise from below. */
+    listTravelYpx: 22,
   },
 } as const;

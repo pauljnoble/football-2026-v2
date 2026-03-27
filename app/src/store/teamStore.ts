@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import formationsData from '../data/formations';
 import teamsData from '../data/teams';
 import { getPlayersByTeamCode } from '../data/players';
+import { LAYOUT_CONFIG } from '../config/layoutConfig';
 import type { Formation, FormationData, PlayerData, TeamData, Team } from '../types';
 
 export type TeamTransitionState =
@@ -24,6 +25,8 @@ type TeamStore = {
   setFieldMaxWidthPx: (width: number) => void
   viewXOffset: number
   setViewXOffset: (offset: number) => void
+  isPlayerListVisible: boolean
+  setIsPlayerListVisible: (visible: boolean) => void
 }
 
 const typedTeamsData: TeamData = teamsData;
@@ -55,8 +58,10 @@ export const useTeamStore = create<TeamStore>((set) => ({
   setActivePlayerId: (activePlayerId) => set({ activePlayerId }),
   listHoveredPlayerId: null,
   setListHoveredPlayerId: (listHoveredPlayerId) => set({ listHoveredPlayerId }),
-  fieldMaxWidthPx: 1200,
+  fieldMaxWidthPx: LAYOUT_CONFIG.baseMaxPitchWidthPx,
   setFieldMaxWidthPx: (fieldMaxWidthPx) => set({ fieldMaxWidthPx }),
   viewXOffset: 0,
   setViewXOffset: (viewXOffset) => set({ viewXOffset }),
+  isPlayerListVisible: true,
+  setIsPlayerListVisible: (isPlayerListVisible) => set({ isPlayerListVisible }),
 }));
