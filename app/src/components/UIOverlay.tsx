@@ -111,7 +111,7 @@ const UIOverlay = ({
     <Root $isPlayerListVisible={isPlayerListVisible}>
       <DebugPanel>frameloop: {frameloopMode}</DebugPanel>
       <Top style={topSpring}>
-        <Heading>
+        <Heading $shadowColor={team.bgColor}>
           <StaggeredTeamHeading
             teamName={teamName}
             transitionState={transitionState}
@@ -213,7 +213,7 @@ const DebugPanel = styled.div`
   text-transform: lowercase;
 `;
 
-const Heading = styled.h1`
+const Heading = styled.h1<{ $shadowColor: string }>`
   margin: 0;
   font-size: clamp(64px, 14vw, 120px);
   line-height: 0.9;
@@ -223,6 +223,10 @@ const Heading = styled.h1`
   text-transform: uppercase;
   padding-bottom: 16px;
   overflow: visible;
+
+  span {
+    text-shadow: 0 0 10px ${({ $shadowColor }) => $shadowColor};
+  }
 
   img {
     width: 100%;

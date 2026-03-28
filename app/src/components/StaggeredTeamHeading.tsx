@@ -92,6 +92,7 @@ export function StaggeredTeamHeading({
       {springs.map((springStyle, index) => {
         const item = items[index];
         if (!item) return null;
+        const zIndex = items.length - index;
 
         if (item.kind === "flag") {
           return (
@@ -100,6 +101,7 @@ export function StaggeredTeamHeading({
               style={{
                 position: "absolute",
                 display: "inline-block",
+                zIndex,
                 ...springStyle,
               }}
             >
@@ -114,6 +116,7 @@ export function StaggeredTeamHeading({
             key={`${index}-${item.char}`}
             style={{
               display: "inline-block",
+              zIndex,
               ...springStyle,
             }}
           >
