@@ -13,10 +13,12 @@ export type Team = {
     scrimTextColor: string;
     uiBgColor: string;
     uiTextColor: string;
+    uiTextDarkColor: string;
     uiTextHighlightColor: string;
     uiAccentBgColor: string;
     uiAccentTextColor: string;
     uiBtnBgColor: string;
+    textFooterColorOverride?: string;
     snippet: string;
     hueRotation?: number;
     cameraAzimuth?: number;
@@ -38,8 +40,16 @@ export type Player = {
     position: PlayerPosition
     number: number
     country: string
+    nationality: string
+    age: number
+    height: number
+    weight: number
+    club: string
+    league: string
+    snippet: string
     profilePicture?: string
     profilePictureUrl?: string
+    scenePictureUrl?: string
 }
 
 /** Static roster entries (id assigned when loading a team via `getPlayersByTeamCode`) */

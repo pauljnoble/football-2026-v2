@@ -1,6 +1,8 @@
 import styled from "styled-components";
-import { animated, useSpring } from "@react-spring/web";
+import { animated, useSpring, useSprings } from "@react-spring/web";
 import type { ComponentProps } from "react";
+import { useEffect, useMemo } from "react";
+import { ANIMATION_CONFIG } from "../config/animationConfig";
 import { useTeamStore, type TeamTransitionState } from "../store/teamStore";
 import Icon from "./Icon";
 import { StaggeredTeamHeading } from "./StaggeredTeamHeading";
@@ -40,6 +42,71 @@ const UIOverlay = ({
     opacity: isPlayerActive ? 0.1 : 1,
   });
 
+  const statValues = useMemo(
+    () => [rank, entries, groupName],
+    [rank, entries, groupName],
+  );
+  const travel = ANIMATION_CONFIG.teamTransition.nameTravelYpx;
+  const duration = ANIMATION_CONFIG.teamTransition.nameAnimationMs;
+  const exitStagger = ANIMATION_CONFIG.teamTransition.nameExitStaggerMs;
+  const enterStagger = ANIMATION_CONFIG.teamTransition.nameEnterStaggerMs;
+  const enterBaseDelay = ANIMATION_CONFIG.teamTransition.nameEnterBaseDelayMs;
+
+  const [statSprings, statApi] = useSprings(
+    statValues.length,
+    () => {
+      if (transitionState === "exited") {
+        return {
+          opacity: 0,
+          transform: `translateY(-${travel}px)`,
+        };
+      }
+      if (transitionState === "entering") {
+        return {
+          opacity: 0,
+          transform: `translateY(${travel}px)`,
+        };
+      }
+      return { opacity: 1, transform: "translateY(0px)" };
+    },
+    [statValues.length, transitionState, travel],
+  );
+
+  useEffect(() => {
+    if (transitionState === "exiting") {
+      void statApi.start((i) => ({
+        to: { opacity: 0, transform: `translateY(-${travel}px)` },
+        delay: i * exitStagger,
+        config: { duration },
+      }));
+    } else if (transitionState === "exited") {
+      void statApi.start(() => ({
+        to: { opacity: 0, transform: `translateY(-${travel}px)` },
+        immediate: true,
+      }));
+    } else if (transitionState === "entering") {
+      void statApi.start((i) => ({
+        from: { opacity: 0, transform: `translateY(${travel}px)` },
+        to: { opacity: 1, transform: "translateY(0px)" },
+        delay: enterBaseDelay + i * enterStagger,
+        config: { duration },
+      }));
+    } else {
+      void statApi.start(() => ({
+        to: { opacity: 1, transform: "translateY(0px)" },
+        immediate: true,
+      }));
+    }
+  }, [
+    duration,
+    enterBaseDelay,
+    enterStagger,
+    exitStagger,
+    statApi,
+    transitionState,
+    travel,
+  ]);
+
   return (
     <Root $isPlayerListVisible={isPlayerListVisible}>
       <DebugPanel>frameloop: {frameloopMode}</DebugPanel>
@@ -71,15 +138,21 @@ const UIOverlay = ({
           </ControlButton>
           <StatCol>
             <StatLabel $color={team.textHighlightColor}>RANK</StatLabel>
-            <StatValue $color={team.textDisplayColor}>{rank}</StatValue>
+            <StatValue $color={team.textDisplayColor} style={statSprings[0]}>
+              {rank}
+            </StatValue>
           </StatCol>
           <StatCol>
             <StatLabel $color={team.textHighlightColor}>ENTRIES</StatLabel>
-            <StatValue $color={team.textDisplayColor}>{entries}</StatValue>
+            <StatValue $color={team.textDisplayColor} style={statSprings[1]}>
+              {entries}
+            </StatValue>
           </StatCol>
           <StatCol>
             <StatLabel $color={team.textHighlightColor}>GROUP</StatLabel>
-            <StatValue $color={team.textDisplayColor}>{groupName}</StatValue>
+            <StatValue $color={team.textDisplayColor} style={statSprings[2]}>
+              {groupName}
+            </StatValue>
           </StatCol>
           <ControlButton
             type="button"
@@ -94,9 +167,12 @@ const UIOverlay = ({
       </Top>
       <FooterSnippet
         $dimmed={isTransitioningTeam}
-        style={{ color: team.textHighlightColor, ...topSpring }}
+        style={{
+          color: team.textFooterColorOverride ?? team.textHighlightColor,
+          ...topSpring,
+        }}
       >
-        {team.snippet}
+        <div>{team.snippet}</div>
       </FooterSnippet>
     </Root>
   );
@@ -111,6 +187,9 @@ const Root = styled.div<{ $isPlayerListVisible: boolean }>`
   align-items: center;
   pointer-events: none;
   padding: 24px 24px 12px;
+  transition: transform 0.3s ease;
+  transform: ${({ $isPlayerListVisible }) =>
+    $isPlayerListVisible ? "translateX(60px)" : "translateX(0)"};
 `;
 
 const Top = styled(animated.div)`
@@ -228,7 +307,7 @@ const StatLabel = styled.div<{ $color: string }>`
   transition-delay: 100ms;
 `;
 
-const StatValue = styled.div<{ $color: string }>`
+const StatValue = styled(animated.div)<{ $color: string }>`
   color: ${({ $color }) => $color};
   font-size: clamp(20px, 7.2vw, 48px);
   line-height: 0.84;
@@ -286,6 +365,11 @@ const FooterSnippet = styled(animated.div)<{ $dimmed: boolean }>`
   transform-origin: 50% -200px;
   transition: transform 0.3s ease;
   transform: ${({ $dimmed }) => ($dimmed ? "scale(0.9)" : "scale(1)")};
+
+  > div {
+    opacity: ${({ $dimmed }) => ($dimmed ? 0 : 1)};
+    transition: opacity 0.3s ease;
+  }
 `;
 
 export default UIOverlay;

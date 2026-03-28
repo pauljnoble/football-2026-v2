@@ -23,7 +23,9 @@ export default function App() {
   const players = useTeamStore((state) => state.players);
   const formation = useTeamStore((state) => state.formation);
   const team = useTeamStore((state) => state.team);
-  const isPlayerListVisible = useTeamStore((state) => state.isPlayerListVisible);
+  const isPlayerListVisible = useTeamStore(
+    (state) => state.isPlayerListVisible,
+  );
   const setFieldMaxWidthPx = useTeamStore((state) => state.setFieldMaxWidthPx);
 
   const {
@@ -232,11 +234,12 @@ export default function App() {
         />
         <PlayerDetails />
         <PlayerList />
-        <DebugSlider />
+        {/* <DebugSlider /> */}
         <StyledCanvas
           style={{ width: "100%", height: "100%", display: "block" }}
           frameloop={frameloopMode}
           dpr={[1, 2]}
+          $isPlayerListVisible={isPlayerListVisible}
           gl={{
             // alpha: true,
             antialias: true,
@@ -259,7 +262,7 @@ export default function App() {
   );
 }
 
-const StyledCanvas = styled(Canvas)`
+const StyledCanvas = styled(Canvas)<{ $isPlayerListVisible: boolean }>`
   width: 100%;
   height: 100%;
   display: block;
@@ -269,6 +272,9 @@ const StyledCanvas = styled(Canvas)`
   right: 0;
   bottom: 0;
   z-index: 0;
+  transition: transform 0.3s ease;
+  transform: ${({ $isPlayerListVisible }) =>
+    $isPlayerListVisible ? "translateX(60px)" : "translateX(0)"};
 `;
 
 const Root = styled(a.div)`

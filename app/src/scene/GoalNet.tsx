@@ -22,7 +22,7 @@ type GoalProps = {
   netSideMaterial: THREE.Material;
 };
 
-const NET_TILE_WORLD_SIZE = 1.2;
+const NET_TILE_WORLD_SIZE = 1.6;
 
 const getGoalDimensions = (fieldHeight: number) => {
   const goalWidth = fieldHeight * 0.18;

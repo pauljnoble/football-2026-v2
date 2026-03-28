@@ -26,6 +26,7 @@ function useMeasure() {
 export default function PlayerList() {
   const players = useTeamStore((state) => state.players);
   const team = useTeamStore((state) => state.team);
+  const activePlayerId = useTeamStore((state) => state.activePlayerId);
   const setListHoveredPlayerId = useTeamStore(
     (state) => state.setListHoveredPlayerId,
   );
@@ -57,6 +58,7 @@ export default function PlayerList() {
     height: targetHeight,
     opacityList: targetListOpacity,
     opacityToggle: isPlayerListVisible ? 0 : 1,
+    opacityScrim: activePlayerId ? 0.6 : 0,
     config: { tension: 300, friction: 30 },
   });
   const listTravelY = ANIMATION_CONFIG.teamTransition.listTravelYpx;
@@ -124,6 +126,13 @@ export default function PlayerList() {
         $highlightColor={team.textHighlightColor}
         $uiBtnBgColor={team.uiBtnBgColor}
       >
+        <Scrim
+          style={{
+            opacity: spring.opacityScrim,
+            pointerEvents: activePlayerId ? "auto" : "none",
+            backgroundColor: team.bgColor,
+          }}
+        />
         <ToggleContainer
           style={{
             opacity: spring.opacityToggle,
@@ -156,7 +165,27 @@ export default function PlayerList() {
                     setIsPlayerListVisible(false);
                   }}
                 >
-                  ✕
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 20 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M4 2.5V13.5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M14.5 3.5L10 8L14.5 12.5"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </CloseButton>
               </Header>
               <List>
@@ -195,9 +224,15 @@ const Root = styled.div`
   bottom: 0;
   display: flex;
   align-items: center;
-  padding: 20px;
+  padding: 12px;
   z-index: 100;
   pointer-events: none;
+`;
+
+const Scrim = styled(animated.div)`
+  position: absolute;
+  inset: 0;
+  z-index: 2;
 `;
 
 const Content = styled.div`
@@ -256,7 +291,7 @@ const Title = styled.h2`
   font-weight: 700;
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.04em;
 `;
 
 const CloseButton = styled.div`
@@ -283,7 +318,7 @@ const CloseButton = styled.div`
 const List = styled.ul`
   list-style: none;
   margin: 0;
-  padding: 12px 0 20px;
+  padding: 4px 0 12px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -300,9 +335,9 @@ const List = styled.ul`
 const ListItem = styled(animated.li)`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   font-size: 20px;
-  padding: 8px 12px;
+  padding: 8px 12px 8px 8px;
   cursor: pointer;
   border-radius: 16px;
   overflow: hidden;
@@ -349,7 +384,7 @@ const PlayerNumber = styled.span`
   text-align: center;
   height: 24px;
   flex-shrink: 0;
-  font-size: 16px;
+  font-size: 15px;
   border-radius: 50%;
   display: flex;
   align-items: center;
