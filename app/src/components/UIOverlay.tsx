@@ -108,26 +108,27 @@ const UIOverlay = ({
   ]);
 
   return (
-    <Root $isPlayerListVisible={isPlayerListVisible}>
-      <DebugPanel>frameloop: {frameloopMode}</DebugPanel>
-      <Top style={topSpring}>
-        <Heading $shadowColor={team.bgColor}>
-          <StaggeredTeamHeading
-            teamName={teamName}
-            transitionState={transitionState}
-            wrapperStyle={teamNameSpring}
-            flag={
-              <Flag>
-                <img
-                  src={`${import.meta.env.BASE_URL}img/players/${team.code}/flag.png`}
-                  alt={team.name}
-                />
-              </Flag>
-            }
-          />
-        </Heading>
-        <StatsRow>
-          <ControlButton
+    <>
+      <Root $isPlayerListVisible={isPlayerListVisible}>
+        <DebugPanel>frameloop: {frameloopMode}</DebugPanel>
+        <Top style={topSpring}>
+          <Heading $shadowColor={team.bgColor}>
+            <StaggeredTeamHeading
+              teamName={teamName}
+              transitionState={transitionState}
+              wrapperStyle={teamNameSpring}
+              flag={
+                <Flag>
+                  <img
+                    src={`${import.meta.env.BASE_URL}img/players/${team.code}/flag.png`}
+                    alt={team.name}
+                  />
+                </Flag>
+              }
+            />
+          </Heading>
+          <StatsRow>
+            {/* <ControlButton
             type="button"
             aria-label="Previous team"
             onClick={goPrev}
@@ -135,26 +136,32 @@ const UIOverlay = ({
             $bgColor={team.uiBtnBgColor}
           >
             <Icon name="arrow-left" />
-          </ControlButton>
-          <StatCol>
-            <StatLabel $color={team.textHighlightColor}>RANK</StatLabel>
-            <StatValue $color={team.textDisplayColor} style={statSprings[0]}>
-              {rank}
-            </StatValue>
-          </StatCol>
-          <StatCol>
-            <StatLabel $color={team.textHighlightColor}>ENTRIES</StatLabel>
-            <StatValue $color={team.textDisplayColor} style={statSprings[1]}>
-              {entries}
-            </StatValue>
-          </StatCol>
-          <StatCol>
-            <StatLabel $color={team.textHighlightColor}>GROUP</StatLabel>
-            <StatValue $color={team.textDisplayColor} style={statSprings[2]}>
-              {groupName}
-            </StatValue>
-          </StatCol>
-          <ControlButton
+          </ControlButton> */}
+            <StatCol>
+              <StatLabel $color={team.textHighlightColor}>RANK</StatLabel>
+              <StatValue $color={team.textDisplayColor} style={statSprings[0]}>
+                {rank}
+              </StatValue>
+            </StatCol>
+            <StatCol>
+              <StatLabel $color={team.textHighlightColor}>ENTRIES</StatLabel>
+              <StatValue $color={team.textDisplayColor} style={statSprings[1]}>
+                {entries}
+              </StatValue>
+            </StatCol>
+            <StatCol>
+              <StatLabel $color={team.textHighlightColor}>GROUP</StatLabel>
+              <StatValue $color={team.textDisplayColor} style={statSprings[2]}>
+                {groupName}
+              </StatValue>
+            </StatCol>
+            <StatCol>
+              <StatLabel $color={team.textHighlightColor}>POT</StatLabel>
+              <StatValue $color={team.textDisplayColor} style={statSprings[2]}>
+                3
+              </StatValue>
+            </StatCol>
+            {/* <ControlButton
             type="button"
             aria-label="Next team"
             onClick={goNext}
@@ -162,10 +169,11 @@ const UIOverlay = ({
             $bgColor={team.uiBtnBgColor}
           >
             <Icon name="arrow-right" />
-          </ControlButton>
-        </StatsRow>
-      </Top>
-      <FooterSnippet
+          </ControlButton> */}
+          </StatsRow>
+        </Top>
+
+        {/* <FooterSnippet
         $dimmed={isTransitioningTeam}
         style={{
           color: team.textFooterColorOverride ?? team.textHighlightColor,
@@ -173,8 +181,48 @@ const UIOverlay = ({
         }}
       >
         <div>{team.snippet}</div>
-      </FooterSnippet>
-    </Root>
+      </FooterSnippet> */}
+      </Root>
+      <FooterTmp $isPlayerListVisible={isPlayerListVisible}>
+        <div
+          style={{
+            color: team.textDisplayColor,
+            background: team.uiBtnBgColor,
+          }}
+          onClick={goPrev}
+        >
+          <Icon name="arrow-left" />
+        </div>
+        <div
+          style={{
+            color: team.textDisplayColor,
+            background: team.uiBtnBgColor,
+          }}
+        >
+          <span>TEAMS</span>
+        </div>
+        <div
+          style={{
+            color: team.textDisplayColor,
+            background: team.uiBtnBgColor,
+          }}
+          onClick={goNext}
+        >
+          <Icon name="arrow-right" />
+        </div>
+      </FooterTmp>
+      <FormationTmp>
+        <FormationTmpBtn
+          style={{
+            color: team.textDisplayColor,
+            background: team.uiBtnBgColor,
+          }}
+        >
+          <span>{team.defaultFormation}</span>
+          <Icon name="chevron-up" />
+        </FormationTmpBtn>
+      </FormationTmp>
+    </>
   );
 };
 
@@ -287,9 +335,36 @@ const Flag = styled.div`
   }
 `;
 
+const FormationTmp = styled.div`
+  position: fixed;
+  bottom: 24px;
+  right: 32px;
+  display: flex;
+  justify-content: center;
+  z-index: 999;
+`;
+
+const FormationTmpBtn = styled.div`
+  --size: 40px;
+  height: var(--size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 18px;
+  padding: 0 16px 0 24px;
+  border-radius: calc(var(--size) / 2);
+
+  svg {
+    width: 16px;
+    opacity: 0.5;
+  }
+`;
+
 const StatsRow = styled.div`
-  display: grid;
-  grid-template-columns: auto 1fr 1fr 1fr auto;
+  display: flex;
+  justify-content: ceneter;
   align-items: center;
   gap: 32px;
 `;
@@ -298,7 +373,7 @@ const StatCol = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
 `;
 
 const StatLabel = styled.div<{ $color: string }>`
@@ -317,6 +392,100 @@ const StatValue = styled(animated.div)<{ $color: string }>`
   line-height: 0.84;
   font-weight: 800;
   padding-top: 2px;
+`;
+
+const FooterTmp = styled.div<{ $isPlayerListVisible: boolean }>`
+  --size: 48px;
+  --icon-size: 20px;
+  --font-size: 20px;
+
+  position: fixed;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  z-index: 999;
+  transform: ${({ $isPlayerListVisible }) =>
+    $isPlayerListVisible ? "translateX(60px)" : "translateY(0)"};
+  transition: transform 0.3s ease;
+
+  > div svg {
+    width: var(--icon-size);
+  }
+
+  > div:nth-child(1) {
+    cursor: default;
+    transform-origin: 100% 50%;
+    transition: transform 200ms ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  > div:nth-child(3) {
+    cursor: default;
+    transform-origin: 0% 50%;
+    transition: transform 200ms ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  > div {
+    cursor: pointer;
+    /* outline: 1px solid #ffffff11; */
+  }
+
+  > div:first-child,
+  div:last-child {
+    height: var(--size);
+    flex: 0 0 var(--size);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  &:has(> div:nth-child(2):hover) {
+    > div:nth-child(1) {
+      transform: translateX(-5px);
+    }
+    > div:nth-child(3) {
+      transform: translateX(5px);
+    }
+  }
+
+  > div:nth-child(2) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: var(--size);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    flex: 0;
+    padding: 0 24px;
+    display: flex;
+    font-size: var(--font-size);
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border-radius: calc(var(--size) / 2);
+    transition: transform 200ms ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    svg {
+      width: 18px;
+    }
+  }
 `;
 
 const ControlButton = styled.button<{ $bgColor: string }>`

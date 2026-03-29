@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useSpring, useSprings, animated } from "@react-spring/web";
 import { ANIMATION_CONFIG } from "../config/animationConfig";
 import { useTeamStore } from "../store/teamStore";
+import { formatPlayerListName } from "../utils/formatPlayerListName";
 
 function useMeasure() {
   const ref = useRef<HTMLDivElement>(null);
@@ -46,6 +47,8 @@ export default function PlayerList() {
   // We need to account for padding of the container if the container has no padding.
   const targetHeight = isPlayerListVisible ? listBounds.height || "auto" : 48;
   const targetWidth = isPlayerListVisible ? listBounds.width || "auto" : 48;
+  const targetLeft = isPlayerListVisible ? 0 : 12;
+  const targetTop = isPlayerListVisible ? 0 : 12;
   const targetListOpacity =
     isPlayerListVisible &&
     transitionState !== "exiting" &&
@@ -56,6 +59,8 @@ export default function PlayerList() {
   const spring = useSpring({
     width: targetWidth,
     height: targetHeight,
+    x: targetLeft,
+    y: targetTop,
     opacityList: targetListOpacity,
     opacityToggle: isPlayerListVisible ? 0 : 1,
     opacityScrim: activePlayerId ? 0.6 : 0,
@@ -120,6 +125,8 @@ export default function PlayerList() {
         style={{
           width: spring.width,
           height: spring.height,
+          left: spring.x,
+          top: spring.y,
         }}
         $bgColor={team.uiBgColor}
         $textColor={team.uiTextColor}
@@ -156,8 +163,9 @@ export default function PlayerList() {
             <Content>
               <Header style={listSprings[0]}>
                 <Title style={{ color: team.uiTextHighlightColor }}>
-                  Starting XI
+                  Summary
                 </Title>
+
                 <CloseButton
                   style={{ color: team.uiTextHighlightColor }}
                   onClick={(e) => {
@@ -188,6 +196,12 @@ export default function PlayerList() {
                   </svg>
                 </CloseButton>
               </Header>
+              <Snippet>{team.snippet}</Snippet>
+              <Header>
+                <Title style={{ color: team.uiTextHighlightColor }}>
+                  Starting XI
+                </Title>
+              </Header>
               <List>
                 {players.map((player, index) => (
                   <ListItem
@@ -205,7 +219,7 @@ export default function PlayerList() {
                     >
                       {player.number}
                     </PlayerNumber>
-                    <PlayerName>{player.name}</PlayerName>
+                    <PlayerName>{formatPlayerListName(player.name)}</PlayerName>
                   </ListItem>
                 ))}
               </List>
@@ -223,10 +237,14 @@ const Root = styled.div`
   top: 0;
   bottom: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: 12px;
   z-index: 100;
   pointer-events: none;
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const Scrim = styled(animated.div)`
@@ -242,6 +260,11 @@ const Content = styled.div`
   overflow-y: auto;
   flex: 1;
   width: var(--dim-side-panel-root-width);
+`;
+
+const Snippet = styled.div`
+  padding: 4px 12px 12px 16px;
+  font-size: 20px;
 `;
 
 const ToggleContainer = styled(animated.div)`
@@ -274,7 +297,7 @@ const MeasurementWrapper = styled.div`
   display: flex;
   flex-direction: column;
   /* We want to measure the full organic height, so we let it grow but cap at 80vh to match max-height of container */
-  max-height: 80vh;
+  max-height: calc(100vh - 24px);
   width: var(--dim-side-panel-root-width);
   height: max-content;
 `;
@@ -324,6 +347,7 @@ const List = styled.ul`
   gap: 0;
   overflow-y: auto;
   flex: 1;
+  min-height: calc(100vh - 24px);
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge legacy */
 
@@ -367,7 +391,7 @@ const Container = styled(animated.div)<{
   border-radius: 24px;
   overflow: hidden;
   pointer-events: auto;
-  max-height: 80vh;
+  max-height: calc(100vh - 24px);
 
   ${ToggleContainer} {
     background-color: ${(props) => props.$uiBtnBgColor};
