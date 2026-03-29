@@ -140,7 +140,8 @@ const UIOverlay = ({
             <StatCol>
               <StatLabel $color={team.textHighlightColor}>RANK</StatLabel>
               <StatValue $color={team.textDisplayColor} style={statSprings[0]}>
-                {rank}
+                <span>#</span>
+                <span>{rank.replace("#", "")}</span>
               </StatValue>
             </StatCol>
             <StatCol>
@@ -338,7 +339,7 @@ const Flag = styled.div`
 const FormationTmp = styled.div`
   position: fixed;
   bottom: 24px;
-  right: 32px;
+  right: 24px;
   display: flex;
   justify-content: center;
   z-index: 999;
@@ -392,6 +393,14 @@ const StatValue = styled(animated.div)<{ $color: string }>`
   line-height: 0.84;
   font-weight: 800;
   padding-top: 2px;
+  display: inline-flex;
+
+  span:nth-child(1) {
+    font-size: 0.66em;
+    padding-right: 1px;
+    padding-top: 1px;
+    font-weight: 600;
+  }
 `;
 
 const FooterTmp = styled.div<{ $isPlayerListVisible: boolean }>`
@@ -471,12 +480,19 @@ const FooterTmp = styled.div<{ $isPlayerListVisible: boolean }>`
     flex: 0;
     padding: 0 24px;
     display: flex;
+    gap: 8px;
     font-size: var(--font-size);
     align-items: center;
     justify-content: center;
     color: white;
     border-radius: calc(var(--size) / 2);
     transition: transform 200ms ease;
+
+    span + span {
+      opacity: 0.66;
+      font-weight: 600;
+      font-size: 0.8em;
+    }
 
     &:hover {
       transform: scale(1.1);

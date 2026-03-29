@@ -4,6 +4,7 @@ import { useSpring, useSprings, animated } from "@react-spring/web";
 import { ANIMATION_CONFIG } from "../config/animationConfig";
 import { useTeamStore } from "../store/teamStore";
 import { formatPlayerListName } from "../utils/formatPlayerListName";
+import Icon from "./Icon";
 
 function useMeasure() {
   const ref = useRef<HTMLDivElement>(null);
@@ -45,8 +46,8 @@ export default function PlayerList() {
   // If listBounds hasn't measured yet, use 'auto' to let it take shape,
   // or a reasonable default. Actually we can just animate height explicitly.
   // We need to account for padding of the container if the container has no padding.
-  const targetHeight = isPlayerListVisible ? listBounds.height || "auto" : 48;
-  const targetWidth = isPlayerListVisible ? listBounds.width || "auto" : 48;
+  const targetHeight = isPlayerListVisible ? listBounds.height || "auto" : 44;
+  const targetWidth = isPlayerListVisible ? listBounds.width || "auto" : 44;
   const targetLeft = isPlayerListVisible ? 0 : 12;
   const targetTop = isPlayerListVisible ? 0 : 12;
   const targetListOpacity =
@@ -147,7 +148,7 @@ export default function PlayerList() {
           }}
           onClick={() => setIsPlayerListVisible(true)}
         >
-          <MenuIcon>☰</MenuIcon>
+          <Icon name="sidebar" />
         </ToggleContainer>
 
         {/* We use a measurable wrapper to find the organic height of the list */}
@@ -278,6 +279,10 @@ const ToggleContainer = styled(animated.div)`
   align-items: center;
   justify-content: center;
   cursor: pointer;
+
+  svg {
+    width: 20px;
+  }
 `;
 
 const MenuIcon = styled.div`
